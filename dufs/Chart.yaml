@@ -1,6 +1,6 @@
 apiVersion: v2
-name: helm-boilerplate
-description: A Helm chart for Kubernetes
+name: dufs
+description: A Helm chart for running dufs (https://github.com/sigoden/dufs)
 icon: "https://raw.githubusercontent.com/kubernetes/community/master/icons/png/resources/unlabeled/deploy-128.png"
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -22,7 +22,7 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.1.0"
+appVersion: "v0.43.0"
 
 maintainers:
   - name: "webofmars"

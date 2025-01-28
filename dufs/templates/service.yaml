@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "helm-boilerplate.fullname" . }}
+  name: {{ include "dufs.fullname" . }}
   labels:
-    {{- include "helm-boilerplate.labels" . | nindent 4 }}
+    {{- include "dufs.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "helm-boilerplate.selectorLabels" . | nindent 4 }}
+    {{- include "dufs.selectorLabels" . | nindent 4 }}

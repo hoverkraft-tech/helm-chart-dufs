@@ -2,6 +2,31 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- dufs config file that will be used
+#    check the auth section if you want to add some authentication
+#    and allow uploads/deletes/patchs
+"dufs.yaml": |
+  # please adjust settings to your needs
+  serve-path: '/dufs/data'
+  auth: []
+  allow-all: false
+  allow-upload: true
+  allow-delete: true
+  allow-search: true
+  allow-symlink: true
+  allow-archive: true
+  enable-cors: true
+  render-index: true
+  render-try-index: true
+  render-spa: true
+  log-format: '$remote_addr "$request" $status $http_user_agent'
+  log-file: /dev/stdout
+  compress: low
+
+# --  url of a zip file containing assets for custom Ui
+#     see https://github.com/sigoden/dufs/tree/main/assets for reference
+assetsZipUrl: ""
+
 replicaCount: 1
 
 image:

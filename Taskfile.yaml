@@ -1,0 +1,29 @@
+version: '3'
+
+vars:
+  K8S_VERSION: 1.31.0
+
+tasks:
+
+  default:
+    cmds:
+      - task --list-all | awk '{ print $2 }' | cut -d ':' -f 1 | grep -vE '^Available|default$' | fzf | xargs -L 1 task
+    silent: true
+
+  tests:
+    cmds:
+      - task kubeconform
+      - task ct-lint
+      - task ct-install
+
+  ct-lint:
+    cmds:
+      - ct lint
+
+  ct-install:
+    cmds:
+      - ct install
+
+  kubeconform:
+    cmds:
+      - helm kubeconform --values-dir dufs/ci --kubernetes-version {{ .K8S_VERSION }} --summary dufs

@@ -137,7 +137,6 @@ jobs:
           force: true
           update-dependencies: true
           version: ${{ needs.update_release_draft.outputs.latestRelease }}
-          appVersion: ${{ needs.update_release_draft.outputs.latestRelease }}
         env:
           OCI_REGISTRY: ghcr.io
           OCI_REGISTRY_USERNAME: ${{ github.actor }}

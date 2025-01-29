@@ -5,6 +5,9 @@
             "properties": {},
             "type": "object"
         },
+        "assetsZipUrl": {
+            "type": "string"
+        },
         "autoscaling": {
             "properties": {
                 "enabled": {
@@ -21,6 +24,9 @@
                 }
             },
             "type": "object"
+        },
+        "dufs.yaml": {
+            "type": "string"
         },
         "fullnameOverride": {
             "type": "string"

@@ -1,6 +1,6 @@
 # dufs
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.43.0](https://img.shields.io/badge/AppVersion-v0.43.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.43.0](https://img.shields.io/badge/AppVersion-v0.43.0-informational?style=flat-square)
 
 A Helm chart for running dufs (https://github.com/sigoden/dufs)
 
@@ -15,7 +15,9 @@ A Helm chart for running dufs (https://github.com/sigoden/dufs)
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| "dufs.yaml" | string | `"# please adjust settings to your needs\nserve-path: '/dufs/data'\nauth: []\nallow-all: false\nallow-upload: true\nallow-delete: true\nallow-search: true\nallow-symlink: true\nallow-archive: true\nenable-cors: true\nrender-index: true\nrender-try-index: true\nrender-spa: true\nlog-format: '$remote_addr \"$request\" $status $http_user_agent'\nlog-file: /dev/stdout\ncompress: low\n"` | dufs config file that will be used    check the auth section if you want to add some authentication    and allow uploads/deletes/patchs |
 | affinity | object | `{}` |  |
+| assetsZipUrl | string | `""` | url of a zip file containing assets for custom Ui     see https://github.com/sigoden/dufs/tree/main/assets for reference |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `100` |  |
 | autoscaling.minReplicas | int | `1` |  |

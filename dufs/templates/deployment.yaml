@@ -30,11 +30,37 @@ spec:
       serviceAccountName: {{ include "dufs.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.assetsZipUrl }}
+      initContainers:
+        - name: setup-theme
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+                set -ex
+                cd /assets
+                wget --no-verbose --tries=3 --timeout=15 -O assets.zip {{ .Values.assetsZipUrl | quote }}
+                unzip assets.zip
+                rm assets.zip
+          volumeMounts:
+            - name: dufs-assets
+              mountPath: /assets
+              readOnly: false
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           env:
             - name: DUFS_CONFIG
-              value: "/dufs/config/dufs.yaml"
+              value: '/dufs/config/dufs.yaml'
+            - name: DUFS_BIND
+              value: '0.0.0.0'
+            - name: DUFS_PORT
+              value: '5000'
+            {{- if .Values.assetsZipUrl }}
+            - name: DUFS_ASSETS
+              value: '/assets'
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -53,6 +79,11 @@ spec:
             - name: config
               mountPath: /dufs/config
               readOnly: true
+          {{- if .Values.assetsZipUrl }}
+            - name: dufs-assets
+              mountPath: /assets
+              readOnly: false
+          {{- end }}
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -60,6 +91,10 @@ spec:
         - name: config
           configMap:
             name: {{ include "dufs.fullname" . }}
+      {{- if .Values.assetsZipUrl }}
+        - name: dufs-assets
+          emptyDir: {}
+      {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

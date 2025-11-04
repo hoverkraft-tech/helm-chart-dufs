@@ -61,7 +61,7 @@ jobs:
     runs-on: self-hosted
     steps:
       # Get a local copy of the code
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # install tools with asdf
       - name: install tools with asdf

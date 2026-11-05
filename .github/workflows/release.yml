@@ -11,7 +11,7 @@ jobs:
 
   check-branches:
     name: Check branches
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Check branch
         run: |
@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       latestRelease: ${{ steps.update_release_draft.outputs.tag_name }}
     steps:
@@ -58,7 +58,7 @@ jobs:
   helm-publish:
     name: "Helm: push chart to OCI registry"
     needs: [update_release_draft, ci]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       # Get a local copy of the code
       - uses: actions/checkout@v4

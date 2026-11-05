@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   stale:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/stale@v10.1.0

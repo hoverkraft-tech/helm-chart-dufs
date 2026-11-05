@@ -33,7 +33,7 @@ jobs:
     steps:
       # create a new release
       - id: update_release_draft
-        uses: release-drafter/release-drafter@v6
+        uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # ratchet:release-drafter/release-drafter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -61,11 +61,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Get a local copy of the code
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
 
       # install tools with asdf
       - name: install tools with asdf
-        uses: asdf-vm/actions/install@v3
+        uses: asdf-vm/actions/install@b7bcd026f18772e44fe1026d729e1611cc435d47 # ratchet:asdf-vm/actions/install@v4
 
       - name: login to OCI registry
         run: |
@@ -88,17 +88,17 @@ jobs:
           VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
 
       - name: update helm chart docs
-        uses: losisin/helm-docs-github-action@v1.3.5
+        uses: losisin/helm-docs-github-action@9e0787c426fdec38be6288bb5c0559dcb388412c # ratchet:losisin/helm-docs-github-action@v2.0.1
         with:
           chart-search-root: dufs
           git-push: "false"
 
       - name: update helm values schema json
-        uses: losisin/helm-values-schema-json-action@v2.3.1
+        uses: losisin/helm-values-schema-json-action@9ed68d9d464a5e6f7f5fc1f3dc071828cf7d13a2 # ratchet:losisin/helm-values-schema-json-action@v3.2.0
         with:
           input: dufs/values.yaml
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@0.27.0
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4a6ed33ba735d57ebbcd89fe8ed35134de599a67 # ratchet:hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@0.39.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: release-chart-${{ needs.update_release_draft.outputs.latestRelease }}
@@ -125,7 +125,7 @@ jobs:
 
       # Push the chart
       - name: push helm chart to OCI registry
-        uses: hoverkraft-tech/helm-push@v5.0.0
+        uses: hoverkraft-tech/helm-push@c5b04415b85e3a0ae1bbe267e53bd03eef57d1f1 # ratchet:hoverkraft-tech/helm-push@v5.0.0
         with:
           useOCIRegistry: true
           username: ${{ env.OCI_REGISTRY_USERNAME }}

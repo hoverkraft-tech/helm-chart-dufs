@@ -46,9 +46,7 @@ jobs:
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
-          ct install \
-            --target-branch ${{ github.event.repository.default_branch }} \
-            --wait
+          ct install --target-branch ${{ github.event.repository.default_branch }}
       - name: show pods
         if: steps.list-changed.outputs.changed == 'true'
         run: |

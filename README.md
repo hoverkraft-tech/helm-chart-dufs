@@ -27,7 +27,7 @@ See the [chart README](dufs/README.md) for the full list of default values and c
 
 ## Artifact Hub
 
-This chart is listed on [Artifact Hub](https://artifacthub.io/packages/helm/dufs/dufs). The repository metadata is described in [`artifacthub-repo.yml`](artifacthub-repo.yml).
+This chart is listed on [Artifact Hub](https://artifacthub.io/packages/helm/dufs/dufs). The repository metadata is described in [`artifacthub-repo.yml`](artifacthub-repo.yml) and is automatically published to the OCI registry by the [release workflow](.github/workflows/release.yml).
 
 ## Supply chain security
 

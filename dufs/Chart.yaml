@@ -1,7 +1,33 @@
 apiVersion: v2
 name: dufs
 description: A Helm chart for running dufs (https://github.com/sigoden/dufs)
-icon: "https://raw.githubusercontent.com/kubernetes/community/master/icons/png/resources/unlabeled/deploy-128.png"
+icon: "https://raw.githubusercontent.com/hoverkraft-tech/helm-chart-dufs/main/dufs/icon.png"
+
+home: https://github.com/hoverkraft-tech/helm-chart-dufs
+
+sources:
+  - https://github.com/hoverkraft-tech/helm-chart-dufs
+  - https://github.com/sigoden/dufs
+
+keywords:
+  - dufs
+  - file-server
+  - webdav
+  - static-files
+
+annotations:
+  artifacthub.io/category: web-applications
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: support
+      url: https://github.com/hoverkraft-tech/helm-chart-dufs/issues
+    - name: source
+      url: https://github.com/hoverkraft-tech/helm-chart-dufs
+    - name: upstream
+      url: https://github.com/sigoden/dufs
+  helm.sh/images: |
+    - name: dufs
+      image: docker.io/sigoden/dufs:v0.47.0
 
 # A chart can be either an 'application' or a 'library' chart.
 #

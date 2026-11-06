@@ -56,6 +56,13 @@ jobs:
     name: "Helm: push chart to OCI registry"
     needs: [update_release_draft, ci]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # required for keyless cosign sign/attest (Sigstore OIDC)
+      packages: write  # required to push the chart, its signature and attestations to ghcr.io
+    outputs:
+      chart-image: ${{ steps.push-chart.outputs.image }}
+      chart-digest: ${{ steps.push-chart.outputs.digest }}
     steps:
       # Get a local copy of the code
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
@@ -120,22 +127,97 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
-      # Push the chart
+      # Package and push the chart, capturing the immutable OCI digest so that
+      # signing and attestations target the exact artifact that was published.
       - name: push helm chart to OCI registry
-        uses: hoverkraft-tech/helm-push@c5b04415b85e3a0ae1bbe267e53bd03eef57d1f1 # ratchet:hoverkraft-tech/helm-push@v5.0.0
-        with:
-          useOCIRegistry: true
-          username: ${{ env.OCI_REGISTRY_USERNAME }}
-          # NOTE: access-token is the password for OCI registry
-          #       cf https://github.com/bsord/helm-push/blob/5ec3320fb5720a0a5aa210d871999f2b836f2d97/entrypoint.sh#L37
-          access-token: ${{ env.OCI_REGISTRY_PASSWORD }}
-          registry-url: oci://${{ env.OCI_REGISTRY }}/${{ env.OCI_REGISTRY_CHART_REPOSITORY }}
-          chart-folder: dufs
-          force: true
-          update-dependencies: true
-          version: ${{ needs.update_release_draft.outputs.latestRelease }}
+        id: push-chart
+        run: |
+          set -euo pipefail
+          chart_ref="${OCI_REGISTRY}/${OCI_REGISTRY_CHART_REPOSITORY}/dufs"
+          destination="$(mktemp -d)"
+
+          echo "+ package chart ${VERSION}"
+          helm package "${CHART_PATH}" --version "${VERSION}" --destination "${destination}"
+
+          echo "+ push ${chart_ref}:${VERSION}"
+          push_output="$(helm push "${destination}"/dufs-"${VERSION}".tgz "oci://${chart_ref}" 2>&1)"
+          echo "${push_output}"
+
+          digest="$(echo "${push_output}" | grep -oE 'sha256:[a-f0-9]{64}' | head -n1)"
+          if [[ -z "${digest}" ]]; then
+            echo "ERROR: could not determine the pushed chart digest" >&2
+            exit 1
+          fi
+
+          echo "image=${chart_ref}:${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
+          echo "image-digest=${chart_ref}@${digest}" >> "${GITHUB_OUTPUT}"
         env:
+          CHART_PATH: ${{ github.workspace }}/dufs
+          VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
           OCI_REGISTRY: ghcr.io
-          OCI_REGISTRY_USERNAME: ${{ github.actor }}
-          OCI_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-          OCI_REGISTRY_CHART_REPOSITORY: 'hoverkraft-tech/charts'
+          OCI_REGISTRY_CHART_REPOSITORY: hoverkraft-tech/charts
+
+      # 1. Sigstore signature (keyless cosign sign) on the immutable chart digest
+      - name: sign chart with cosign
+        uses: hoverkraft-tech/ci-github-container/actions/helm/sign-chart@5ffc3c81daacc57700a14bb91d67edbc67eedc1d # ratchet:hoverkraft-tech/ci-github-container/actions/helm/sign-chart@0.39.0
+        with:
+          charts: ${{ steps.push-chart.outputs.image-digest }}
+          oci-registry: ghcr.io
+          oci-registry-username: ${{ github.actor }}
+          oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. SLSA build provenance attestation (cosign attest, keyless)
+      - name: attest SLSA provenance
+        run: |
+          set -euo pipefail
+          predicate="$(mktemp).json"
+          jq -n \
+            --arg repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --arg sha "${GITHUB_SHA}" \
+            --arg ref "${GITHUB_REF}" \
+            --arg workflow "${GITHUB_WORKFLOW}" \
+            '{
+              _type: "https://in-toto.io/Statement/v1",
+              subject: [],
+              predicateType: "https://slsa.dev/provenance/v1",
+              predicate: {
+                buildDefinition: {
+                  buildType: ( $repo + "/.github/workflows/release.yml" ),
+                  externalParameters: { repository: $repo, ref: $ref, workflow: $workflow },
+                  internalParameters: { github: { event_name: env.GITHUB_EVENT_NAME, repository_id: env.GITHUB_REPOSITORY_ID } }
+                },
+                runDetails: {
+                  builder: { id: ( $repo + "/actions/runs/" + env.GITHUB_RUN_ID ) },
+                  metadata: { invocationId: ( env.GITHUB_RUN_ID + "/" + env.GITHUB_RUN_ATTEMPT ) }
+                }
+              }
+            }' > "${predicate}"
+          COSIGN_EXPERIMENTAL=1 cosign attest --yes \
+            --predicate "${predicate}" \
+            --type slsaprovenance1 \
+            "${{ steps.push-chart.outputs.image-digest }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3. SBOM (SPDX) generated from the packaged chart and attached via cosign attest
+      - name: generate SPDX SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # ratchet:anchore/sbom-action@v0.24.3
+        with:
+          path: ${{ github.workspace }}/dufs
+          format: spdx-json
+          output-file: sbom.spdx.json
+          upload-artifact: true
+          upload-release-assets: false
+          artifact-name: dufs-chart-sbom
+
+      - name: attest SPDX SBOM
+        run: |
+          set -euo pipefail
+          COSIGN_EXPERIMENTAL=1 cosign attest --yes \
+            --predicate sbom.spdx.json \
+            --type spdxjson \
+            "${{ steps.push-chart.outputs.image-digest }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

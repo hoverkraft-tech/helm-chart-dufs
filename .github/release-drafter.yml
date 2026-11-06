@@ -1,60 +1,46 @@
+name-template: "Version $RESOLVED_VERSION"
+tag-template: "$RESOLVED_VERSION"
+
 template: |
   ## What's Changed
 
   $CHANGES
 
-  ## Full Changelog
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$RESOLVED_VERSION
 
-  - https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$RESOLVED_VERSION
-name-template: "Version $RESOLVED_VERSION"
-tag-template: "$RESOLVED_VERSION"
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 
 categories:
-  - title: '🚀 Features'
+  - title: "🚨 Breaking Changes"
     labels:
-    - 'feature'
-    - 'feat'
-  - title: '🐛 Bug Fixes'
+      - "breaking"
+  - title: "🚀 Features"
     labels:
-      - 'fix'
-      - 'bugfix'
-      - 'bug'
-  - title: '🧰 Maintenance'
-    label: 'chore'
-  - title: '📚 Documentation'
-    label: 'docs'
-  - title: '🧪 Tests'
-    label: 'test'
-  - title: '🏷️ Version Tags'
-    label: 'version'
-  - title: '🔖 Release Tags'
-    label: 'release'
-  - title: '🧩 Dependencies'
-    label: 'dependencies'
-  - title: '🔒 Security'
-    label: 'security'
-  - title: '🚨 Breaking Changes'
-    label: 'breaking'
-  - title: '🧹 Code Cleanup'
-    label: 'cleanup'
-  - title: '🔧 Config'
-    label: 'config'
-  - title: '📦 Packages'
-    label: 'package'
-  - title: '🔥 Removals'
-    label: 'removal'
-  - title: '🚧 Work In Progress'
-    label: 'wip'
-  - title: '🔀 Merges'
-    label: 'merge'
-  - title: '🎨 Style'
-    label: 'style'
-  - title: '🔊 Logging'
-    label: 'logging'
-  - title: '🔇 Silence'
-    label: 'silence'
-  - title: '🤖 CI/CD'
-    label: 'ci'
+      - "feature"
+      - "enhancement"
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "fix"
+      - "bug"
+  - title: "🧩 Dependencies"
+    labels:
+      - "dependencies"
+  - title: "🤖 CI/CD"
+    labels:
+      - "ci"
+  - title: "📚 Documentation"
+    labels:
+      - "documentation"
+  - title: "🧰 Maintenance"
+    labels:
+      - "chore"
+      - "refactor"
+      - "performance"
+      - "style"
+      - "test"
+
+exclude-labels:
+  - "skip-changelog"
 
 version-resolver:
   major:
@@ -68,11 +54,54 @@ version-resolver:
       - "release-patch"
   default: patch
 
+# Labels PRs automatically from Conventional Commits titles,
+# so changelogs are categorized without manual labeling.
 autolabeler:
+  # Version bump
   - label: "release-major"
     title:
+      - "/^\\w+(\\(.+\\))?!:/"
       - "/^BREAKING CHANGE:/"
+    body:
+      - "/BREAKING CHANGE:/"
   - label: "release-minor"
     title:
-      - "/^feat:/"
-      - "/^feat\\(.+\\):/"
+      - "/^feat(\\(.+\\))?:/"
+  # Categories
+  - label: "breaking"
+    title:
+      - "/^\\w+(\\(.+\\))?!:/"
+  - label: "feature"
+    title:
+      - "/^feat(\\(.+\\))?:/"
+  - label: "fix"
+    title:
+      - "/^fix(\\(.+\\))?:/"
+  - label: "dependencies"
+    title:
+      - "/^(deps|build)(\\(.+\\))?:/"
+    branch:
+      - "/^dependabot\\//"
+  - label: "ci"
+    title:
+      - "/^ci(\\(.+\\))?:/"
+  - label: "documentation"
+    title:
+      - "/^docs(\\(.+\\))?:/"
+    files:
+      - "*.md"
+  - label: "chore"
+    title:
+      - "/^chore(\\(.+\\))?:/"
+  - label: "refactor"
+    title:
+      - "/^refactor(\\(.+\\))?:/"
+  - label: "performance"
+    title:
+      - "/^perf(\\(.+\\))?:/"
+  - label: "style"
+    title:
+      - "/^style(\\(.+\\))?:/"
+  - label: "test"
+    title:
+      - "/^test(\\(.+\\))?:/"

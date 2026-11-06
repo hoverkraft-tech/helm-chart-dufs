@@ -1,2 +1,2 @@
 image:
-  registry: fake.registry
+  registry: index.docker.io

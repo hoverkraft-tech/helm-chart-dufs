@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE dir="{{ config_root }}"
+#MISE description="run helm-kubeconform on the given helm chart"
+
+helm kubeconform --values-dir "${HELM_CHART_NAME}/ci" --kubernetes-version "${K8S_VERSION}" --summary "${HELM_CHART_NAME}"

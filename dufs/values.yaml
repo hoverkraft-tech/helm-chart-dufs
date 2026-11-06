@@ -30,6 +30,7 @@ assetsZipUrl: ""
 replicaCount: 1
 
 image:
+  registry: docker.io
   repository: sigoden/dufs
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
@@ -71,6 +72,10 @@ service:
 ingress:
   enabled: false
   className: ""
+  # @schema
+  # type: [object, null]
+  # additionalProperties: true
+  # @schema
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"

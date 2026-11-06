@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE dir="{{ config_root }}"
+#MISE description="run ct install on the given helm chart"
+
+if ! kubectl cluster-info > /dev/null 2>&1; then
+  echo "[ERROR] No k8s cluster can be reached"
+  exit 1
+fi
+
+ct install

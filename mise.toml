@@ -1,0 +1,22 @@
+[settings]
+python.uv_venv_auto = true
+
+[env]
+HELM_HOME = "{{config_root}}/.helm"
+HELM_CACHE_HOME = "${HELM_HOME}/cache"
+HELM_CONFIG_HOME = "${HELM_HOME}/config"
+HELM_DATA_HOME = "${HELM_HOME}/data"
+HELM_CHART_NAME = "dufs"
+K8S_VERSION = "1.37.2"
+_.python.venv = { path = ".venv", create = true }
+
+[tools]
+cosign = "3.1.4"
+github-cli = "2.103.3"
+helm = "4.3.1"
+helm-ct = "3.15.0"
+helm-docs = "1.14.2"
+kubeconform = "0.8.0"
+kubectl = "1.37.2"
+python = "3.14"
+uv = "0.13"

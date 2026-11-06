@@ -24,6 +24,7 @@ A Helm chart for running dufs (https://github.com/sigoden/dufs)
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
+| image.registry | string | `"docker.io"` |  |
 | image.repository | string | `"sigoden/dufs"` |  |
 | image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |

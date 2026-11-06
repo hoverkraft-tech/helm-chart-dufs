@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE dir="{{ config_root }}"
+#MISE description="run tests"
+#USAGE flag "--extra-args <args>" help="pass extra args to helm"
+
+# shellcheck disable=SC2086,SC2154
+helm template "${HELM_CHART_NAME}" ${usage_extra_args}

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: end-of-file-fixer
@@ -16,7 +16,15 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/jtyr/kubeconform-helm
-    rev: v0.1.17
+    rev: v0.3.0
     hooks:
       - id: kubeconform-helm
         args: [--strict]
+
+repos:
+  - repo: https://github.com/dadav/helm-schema
+    rev: 0.24.0
+    hooks:
+      - id: helm-schema
+        pass_filenames: false
+        args: [--keep-existing-dep-schemas]

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE dir="{{ config_root }}"
+#MISE description="run ct lint on the given helm chart"
+
+ct lint

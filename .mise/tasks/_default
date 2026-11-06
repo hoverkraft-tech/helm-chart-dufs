@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE dir="{{ config_root }}"
+#MISE description="run all tasks"
+
+set -eu -o pipefail
+
+mise run schema
+mise run docs
+mise run tests

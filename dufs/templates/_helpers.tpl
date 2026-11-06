@@ -60,3 +60,17 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Normalize image name and version
+*/}}
+{{- define "dufs.image" }}
+{{- $registry := .Values.image.registry }}
+{{- $repository := .Values.image.repository }}
+{{- $tag := default .Chart.AppVersion .Values.image.tag }}
+{{- if $registry }}
+{{- printf "%s/%s:%s" $registry $repository $tag }}
+{{- else }}
+{{- printf "%s:%s" $repository $tag }}
+{{- end }}
+{{- end }}

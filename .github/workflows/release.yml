@@ -151,7 +151,7 @@ jobs:
 
           echo "image=${chart_ref}:${VERSION}" >> "${GITHUB_OUTPUT}"
           echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
-          echo "image-digest=${chart_ref}@${digest}" >> "${GITHUB_OUTPUT}"
+          echo "image-digest=${chart_ref}:${VERSION}@${digest}" >> "${GITHUB_OUTPUT}"
         env:
           CHART_PATH: ${{ github.workspace }}/dufs
           VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}

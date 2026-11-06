@@ -21,7 +21,6 @@ repos:
       - id: kubeconform-helm
         args: [--strict]
 
-repos:
   - repo: https://github.com/dadav/helm-schema
     rev: 0.24.0
     hooks:

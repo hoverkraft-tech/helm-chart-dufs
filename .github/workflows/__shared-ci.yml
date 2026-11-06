@@ -34,6 +34,9 @@ jobs:
           else
             echo "INFO: The chart has no changes compared to the default branch"
           fi
+      - name: Install chart-testing schema validator
+        if: steps.list-changed.outputs.changed == 'true'
+        run: uv pip install --python "${VIRTUAL_ENV}/bin/python" "yamale==6.0.0"
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --target-branch ${{ github.event.repository.default_branch }}

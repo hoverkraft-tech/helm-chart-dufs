@@ -25,6 +25,10 @@ helm install dufs oci://ghcr.io/hoverkraft-tech/charts/dufs -f my-values.yaml
 
 See the [chart README](dufs/README.md) for the full list of default values and configuration options.
 
+## Artifact Hub
+
+This chart is listed on [Artifact Hub](https://artifacthub.io/packages/helm/dufs/dufs). The repository metadata is described in [`artifacthub-repo.yml`](artifacthub-repo.yml).
+
 ## Supply chain security
 
 Every released chart is published to the OCI registry with [Sigstore](https://www.sigstore.dev/) artifacts attached to its immutable digest:

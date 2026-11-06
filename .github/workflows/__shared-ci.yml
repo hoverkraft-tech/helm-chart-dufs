@@ -21,13 +21,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Install tools with asdf
-        uses: asdf-vm/actions/install@b7bcd026f18772e44fe1026d729e1611cc435d47 # ratchet:asdf-vm/actions/install@v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # ratchet:actions/setup-python@v7
-        with:
-          python-version: '3.12'
-      - name: Set up chart-testing
-        uses: helm/chart-testing-action@720270857a28afd41e2426521a7801db09e9b510 # ratchet:helm/chart-testing-action@v2.9.0
+      - name: Install tools with mise
+        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # ratchet:jdx/mise-action@v5
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
@@ -50,7 +45,7 @@ jobs:
         run: |
           ct install \
             --target-branch ${{ github.event.repository.default_branch }} \
-            --wait"
+            --wait
       - name: show pods
         if: steps.list-changed.outputs.changed == 'true'
         run: |

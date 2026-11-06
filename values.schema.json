@@ -1,14 +1,15 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
     "properties": {
         "affinity": {
-            "properties": {},
             "type": "object"
         },
         "assetsZipUrl": {
             "type": "string"
         },
         "autoscaling": {
+            "type": "object",
             "properties": {
                 "enabled": {
                     "type": "boolean"
@@ -22,8 +23,7 @@
                 "targetCPUUtilizationPercentage": {
                     "type": "integer"
                 }
-            },
-            "type": "object"
+            }
         },
         "dufs.yaml": {
             "type": "string"
@@ -32,6 +32,7 @@
             "type": "string"
         },
         "image": {
+            "type": "object",
             "properties": {
                 "pullPolicy": {
                     "type": "string"
@@ -42,16 +43,15 @@
                 "tag": {
                     "type": "string"
                 }
-            },
-            "type": "object"
+            }
         },
         "imagePullSecrets": {
             "type": "array"
         },
         "ingress": {
+            "type": "object",
             "properties": {
                 "annotations": {
-                    "properties": {},
                     "type": "object"
                 },
                 "className": {
@@ -61,13 +61,17 @@
                     "type": "boolean"
                 },
                 "hosts": {
+                    "type": "array",
                     "items": {
+                        "type": "object",
                         "properties": {
                             "host": {
                                 "type": "string"
                             },
                             "paths": {
+                                "type": "array",
                                 "items": {
+                                    "type": "object",
                                     "properties": {
                                         "path": {
                                             "type": "string"
@@ -75,25 +79,22 @@
                                         "pathType": {
                                             "type": "string"
                                         }
-                                    },
-                                    "type": "object"
-                                },
-                                "type": "array"
+                                    }
+                                }
                             }
-                        },
-                        "type": "object"
-                    },
-                    "type": "array"
+                        }
+                    }
                 },
                 "tls": {
                     "type": "array"
                 }
-            },
-            "type": "object"
+            }
         },
         "livenessProbe": {
+            "type": "object",
             "properties": {
                 "httpGet": {
+                    "type": "object",
                     "properties": {
                         "path": {
                             "type": "string"
@@ -101,34 +102,30 @@
                         "port": {
                             "type": "string"
                         }
-                    },
-                    "type": "object"
+                    }
                 }
-            },
-            "type": "object"
+            }
         },
         "nameOverride": {
             "type": "string"
         },
         "nodeSelector": {
-            "properties": {},
             "type": "object"
         },
         "podAnnotations": {
-            "properties": {},
             "type": "object"
         },
         "podLabels": {
-            "properties": {},
             "type": "object"
         },
         "podSecurityContext": {
-            "properties": {},
             "type": "object"
         },
         "readinessProbe": {
+            "type": "object",
             "properties": {
                 "httpGet": {
+                    "type": "object",
                     "properties": {
                         "path": {
                             "type": "string"
@@ -136,24 +133,21 @@
                         "port": {
                             "type": "string"
                         }
-                    },
-                    "type": "object"
+                    }
                 }
-            },
-            "type": "object"
+            }
         },
         "replicaCount": {
             "type": "integer"
         },
         "resources": {
-            "properties": {},
             "type": "object"
         },
         "securityContext": {
-            "properties": {},
             "type": "object"
         },
         "service": {
+            "type": "object",
             "properties": {
                 "port": {
                     "type": "integer"
@@ -161,13 +155,12 @@
                 "type": {
                     "type": "string"
                 }
-            },
-            "type": "object"
+            }
         },
         "serviceAccount": {
+            "type": "object",
             "properties": {
                 "annotations": {
-                    "properties": {},
                     "type": "object"
                 },
                 "automount": {
@@ -179,14 +172,15 @@
                 "name": {
                     "type": "string"
                 }
-            },
-            "type": "object"
+            }
         },
         "tolerations": {
             "type": "array"
         },
         "volumeMounts": {
+            "type": "array",
             "items": {
+                "type": "object",
                 "properties": {
                     "mountPath": {
                         "type": "string"
@@ -197,26 +191,22 @@
                     "readOnly": {
                         "type": "boolean"
                     }
-                },
-                "type": "object"
-            },
-            "type": "array"
+                }
+            }
         },
         "volumes": {
+            "type": "array",
             "items": {
+                "type": "object",
                 "properties": {
                     "emptyDir": {
-                        "properties": {},
                         "type": "object"
                     },
                     "name": {
                         "type": "string"
                     }
-                },
-                "type": "object"
-            },
-            "type": "array"
+                }
+            }
         }
-    },
-    "type": "object"
+    }
 }

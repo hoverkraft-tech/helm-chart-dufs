@@ -84,7 +84,7 @@ jobs:
       - name: update helm chart version
         run: |
           cd "${CHART_PATH}"
-          echo "+ update helm chart version"
+          echo "+ update helm chart version to ${VERSION}"
           sed -i "s/^version: .*/version: ${VERSION}/g" Chart.yaml
           # we don't want to touch appVersion in this case
           # sed -i "s/^appVersion: .*/appVersion: ${VERSION}/g" Chart.yaml
@@ -97,6 +97,20 @@ jobs:
         with:
           chart-search-root: dufs
           git-push: "false"
+
+      - name: update chart README.md version badge
+        run: |
+          echo "+ update chart README.md version badge to ${VERSION}"
+          sed -i -E "s|!\[Version: [^]]+\]\(https://img.shields.io/badge/Version-[^)]+\)|![Version: ${VERSION}](https://img.shields.io/badge/Version-${VERSION}-informational?style=flat-square)|g" dufs/README.md
+        env:
+          VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
+
+      - name: update root README.md version badge
+        run: |
+          echo "+ update root README.md version badge to ${VERSION}"
+          sed -i -E "s|\[!\[Version\]\(https://img.shields.io/badge/Version-[^)]+\)|[![Version](https://img.shields.io/badge/Version-${VERSION}-informational?style=flat-square)|g" README.md
+        env:
+          VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
 
       - name: update helm values schema json
         uses: losisin/helm-values-schema-json-action@9ed68d9d464a5e6f7f5fc1f3dc071828cf7d13a2 # ratchet:losisin/helm-values-schema-json-action@v3.2.0

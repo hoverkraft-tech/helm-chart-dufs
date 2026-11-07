@@ -12,47 +12,58 @@ change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 
 categories:
   - title: "🚨 Breaking Changes"
-    labels:
-      - "breaking"
+    when:
+      labels:
+        - "breaking"
   - title: "🚀 Features"
-    labels:
-      - "feature"
-      - "enhancement"
+    when:
+      labels:
+        - "feature"
+        - "enhancement"
   - title: "🐛 Bug Fixes"
-    labels:
-      - "fix"
-      - "bug"
+    when:
+      labels:
+        - "fix"
+        - "bug"
   - title: "🧩 Dependencies"
-    labels:
-      - "dependencies"
+    when:
+      labels:
+        - "dependencies"
   - title: "🤖 CI/CD"
-    labels:
-      - "ci"
+    when:
+      labels:
+        - "ci"
   - title: "📚 Documentation"
-    labels:
-      - "documentation"
+    when:
+      labels:
+        - "documentation"
   - title: "🧰 Maintenance"
-    labels:
-      - "chore"
-      - "refactor"
-      - "performance"
-      - "style"
-      - "test"
-
-exclude-labels:
-  - "skip-changelog"
-
-version-resolver:
-  major:
-    labels:
-      - "release-major"
-  minor:
-    labels:
-      - "release-minor"
-  patch:
-    labels:
-      - "release-patch"
-  default: patch
+    when:
+      labels:
+        - "chore"
+        - "refactor"
+        - "performance"
+        - "style"
+        - "test"
+  - type: "pre-exclude"
+    when:
+      labels:
+        - "skip-changelog"
+  - type: "version-resolver"
+    semver-increment: "major"
+    when:
+      labels:
+        - "release-major"
+  - type: "version-resolver"
+    semver-increment: "minor"
+    when:
+      labels:
+        - "release-minor"
+  - type: "version-resolver"
+    semver-increment: "patch"
+    when:
+      labels:
+        - "release-patch"
 
 # Labels PRs automatically from Conventional Commits titles,
 # so changelogs are categorized without manual labeling.

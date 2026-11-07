@@ -25,6 +25,21 @@ helm install dufs oci://ghcr.io/hoverkraft-tech/charts/dufs -f my-values.yaml
 
 See the [chart README](dufs/README.md) for the full list of default values and configuration options.
 
+## Dependency updates
+
+The chart tracks the upstream [`sigoden/dufs`](https://hub.docker.com/r/sigoden/dufs) image with two complementary bots:
+
+- **Dependabot** (main choice) — the `helm` ecosystem in [`.github/dependabot.yml`](.github/dependabot.yml) tracks the image reference in `dufs/values.yaml`.
+- **Renovate** (backup) — [`renovate.json`](renovate.json) covers the same image reference plus the ones Dependabot cannot reach: `appVersion` and the `helm.sh/images` annotation in `dufs/Chart.yaml`.
+
+Because the released chart intentionally leaves `image.tag` empty (the chart falls back to `appVersion` at render time), the bots track a marker comment on the `tag` key in `dufs/values.yaml`:
+
+```yaml
+tag: ""  # renovate+dependabot: docker.io/sigoden/dufs:v0.47.0
+```
+
+When a new upstream image is published, the bot opens a PR bumping that marker to the new tag. Reviewing and merging it means the next chart release ships the new dufs version. Renovate additionally proposes the matching `appVersion` and annotation bumps. When releasing, run `mise run` (or the release workflow) to regenerate docs and schema so the marker and `appVersion` stay consistent.
+
 ## Artifact Hub
 
 This chart is listed on [Artifact Hub](https://artifacthub.io/packages/helm/dufs/dufs). The repository metadata is described in [`artifacthub-repo.yml`](artifacthub-repo.yml) and is automatically published to the OCI registry by the [release workflow](.github/workflows/release.yml).

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Track the upstream sigoden/dufs docker image and bump every reference to it (dufs/values.yaml image.tag marker, dufs/Chart.yaml appVersion and helm.sh/images annotation).",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["helmv3", "helm-values", "custom.regex"],
+  "timezone": "UTC",
+  "schedule": ["before 6am on Friday"],
+  "semanticCommits": "enabled",
+  "labels": ["dependencies", "docker"],
+  "packageRules": [
+    {
+      "description": "Group every reference to the upstream sigoden/dufs image in a single PR",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["sigoden/dufs"],
+      "groupName": "dufs docker image",
+      "automerge": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track the dufs image tag in the Artifact Hub helm.sh/images annotation",
+      "managerFilePatterns": ["/(^|/)Chart\\.ya?ml$/"],
+      "matchStrings": [
+        "image:\\s*docker\\.io/sigoden/dufs:(?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "sigoden/dufs",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Keep the chart appVersion in sync with the upstream dufs image",
+      "managerFilePatterns": ["/(^|/)Chart\\.ya?ml$/"],
+      "matchStrings": [
+        "appVersion:\\s*[\"']?(?<currentValue>v?\\d+\\.\\d+\\.\\d+)[\"']?"
+      ],
+      "depNameTemplate": "sigoden/dufs",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}

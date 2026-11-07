@@ -84,7 +84,7 @@
         },
         "tag": {
           "default": "",
-          "description": "Overrides the image tag whose default is the chart appVersion.",
+          "description": "Overrides the image tag whose default is the chart appVersion.\nKeep this empty in the released chart; the trailing marker comment lets\nDependabot and Renovate track the upstream sigoden/dufs image (see the\n\"Dependency updates\" section of the repository README).",
           "title": "tag",
           "type": "string"
         }

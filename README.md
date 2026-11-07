@@ -1,6 +1,7 @@
 # Helm Chart: dufs
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/dufs)](https://artifacthub.io/packages/search?repo=dufs)
+[![Version](https://img.shields.io/badge/Version-0.2.4-informational?style=flat-square)](https://github.com/hoverkraft-tech/helm-chart-dufs/releases)
 [![Main CI](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/main-ci.yml/badge.svg)](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/main-ci.yml)
 [![Release](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/release.yml/badge.svg)](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/release.yml)
 

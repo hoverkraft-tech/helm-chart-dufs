@@ -12,20 +12,3 @@ updates:
       interval: "weekly"
       day: friday
       time: '04:00'
-
-  # Track the upstream sigoden/dufs docker image referenced by the chart.
-  # The image tag is detected from the marker comment on image.tag in
-  # dufs/values.yaml (see https://github.com/hoverkraft-tech/helm-chart-dufs/issues/41).
-  # Renovate (see renovate.json) covers what Dependabot cannot: the
-  # appVersion and the helm.sh/images annotation in dufs/Chart.yaml.
-  - package-ecosystem: "helm"
-    directories:
-      - "/dufs"
-    open-pull-requests-limit: 3
-    labels:
-      - "dependencies"
-      - "docker"
-    schedule:
-      interval: "weekly"
-      day: friday
-      time: '04:00'

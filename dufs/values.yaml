@@ -34,10 +34,7 @@ image:
   repository: sigoden/dufs
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # Keep this empty in the released chart; the trailing marker comment lets
-  # Dependabot and Renovate track the upstream sigoden/dufs image (see the
-  # "Dependency updates" section of the repository README).
-  tag: ""  # renovate+dependabot: docker.io/sigoden/dufs:v0.47.0
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

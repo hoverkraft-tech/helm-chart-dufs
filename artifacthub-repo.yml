@@ -4,12 +4,8 @@
 # This file is automatically pushed to the OCI registry (tag "artifacthub.io")
 # by the release workflow (.github/workflows/release.yml) so that Artifact Hub
 # can fetch it for this OCI-based repository.
-#
-# The repositoryID enables the "Verified Publisher" flag. It is displayed on
-# the repository card (ID) in the Artifact Hub control panel after the
-# repository has been added. Fill it in once the repository is registered.
-#
-# repositoryID: <fill after registering the repository on artifacthub.io>
+
+repositoryID: dfd60ae0-3f53-4421-9cf7-98013449c5dd
 owners:
   - name: Frederic Leger
     email: frederic@webofmars.com

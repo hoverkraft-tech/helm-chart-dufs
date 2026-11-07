@@ -1,9 +1,8 @@
 # Helm Chart: dufs
 
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/dufs)](https://artifacthub.io/packages/search?repo=dufs)
 [![Main CI](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/main-ci.yml/badge.svg)](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/main-ci.yml)
 [![Release](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/release.yml/badge.svg)](https://github.com/hoverkraft-tech/helm-chart-dufs/actions/workflows/release.yml)
-![Version: 0.2.2](https://img.shields.io/badge/Version-0.2.2-informational?style=flat-square)
-![AppVersion: v0.47.0](https://img.shields.io/badge/AppVersion-v0.47.0-informational?style=flat-square)
 
 A Helm chart for running [dufs](https://github.com/sigoden/dufs) — a distinctive utility file server — on Kubernetes.
 

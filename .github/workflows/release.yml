@@ -175,7 +175,7 @@ jobs:
 
       # 1. Sigstore signature (keyless cosign sign) on the immutable chart digest
       - name: sign chart with cosign
-        uses: hoverkraft-tech/ci-github-container/actions/helm/sign-chart@5ffc3c81daacc57700a14bb91d67edbc67eedc1d # ratchet:hoverkraft-tech/ci-github-container/actions/helm/sign-chart@0.39.0
+        uses: hoverkraft-tech/ci-github-container/actions/helm/sign-chart@ec1cd960fb1a1908ac21680756eb49a4c8f018d5 # ratchet:hoverkraft-tech/ci-github-container/actions/helm/sign-chart@0.40.0
         with:
           charts: ${{ steps.push-chart.outputs.image-digest }}
           oci-registry: ghcr.io

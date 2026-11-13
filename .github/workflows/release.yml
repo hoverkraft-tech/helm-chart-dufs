@@ -117,7 +117,7 @@ jobs:
         with:
           values: dufs/values.yaml
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4a6ed33ba735d57ebbcd89fe8ed35134de599a67 # ratchet:hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@0.39.2
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@66882b24f9f13e45a6541896a5a7c638cb91c94c # ratchet:hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: release-chart-${{ needs.update_release_draft.outputs.latestRelease }}

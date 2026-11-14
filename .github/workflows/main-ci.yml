@@ -24,4 +24,3 @@ jobs:
       issues: read
       packages: write
       pull-requests: read
-    secrets: inherit

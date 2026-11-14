@@ -5,18 +5,25 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+
+permissions:
+  contents: read
 
 jobs:
-
   check-branches:
     name: Check branches
     runs-on: ubuntu-latest
     steps:
       - name: Check branch
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
-            echo "This action can only be run on the ${{ github.event.repository.default_branch }} branch"
+          if [[ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]]; then
+            echo "This action can only be run on the $DEFAULT_BRANCH branch"
             exit 1
           fi
 
@@ -33,14 +40,14 @@ jobs:
     steps:
       # create a new release
       - id: update_release_draft
-        uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # ratchet:release-drafter/release-drafter@v7
+        uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # ratchet:release-drafter/release-drafter@v7.10.0
         with:
           publish: true
 
   ci:
     needs: update_release_draft
     name: Continuous Integration
-    uses: ./.github/workflows/__shared-ci.yml
+    uses: $/.github/workflows/__shared-ci.yml
     with:
       tag: ${{ needs.update_release_draft.outputs.latestRelease }}
     permissions:
@@ -50,7 +57,6 @@ jobs:
       issues: read
       packages: write
       pull-requests: read
-    secrets: inherit
 
   helm-publish:
     name: "Helm: push chart to OCI registry"
@@ -58,24 +64,24 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write  # required for keyless cosign sign/attest (Sigstore OIDC)
-      packages: write  # required to push the chart, its signature and attestations to ghcr.io
+      id-token: write # required for keyless cosign sign/attest (Sigstore OIDC)
+      packages: write # required to push the chart, its signature and attestations to ghcr.io
       pull-requests: write
     outputs:
       chart-image: ${{ steps.push-chart.outputs.image }}
       chart-digest: ${{ steps.push-chart.outputs.digest }}
     steps:
       # Get a local copy of the code
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
 
       # install tools with mise
       - name: install tools with mise
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # ratchet:jdx/mise-action@v5
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8; ratchet:jdx/mise-action@v5.2.8
 
       - name: login to OCI registry
         run: |
           echo "+ login to OCI registry"
-          helm registry login ${OCI_REGISTRY} -u "${OCI_REGISTRY_USERNAME}" -p "${OCI_REGISTRY_PASSWORD}"
+          printf '%s' "$OCI_REGISTRY_PASSWORD" | helm registry login "$OCI_REGISTRY" -u "$OCI_REGISTRY_USERNAME" --password-stdin
         env:
           OCI_REGISTRY: ghcr.io
           OCI_REGISTRY_USERNAME: ${{ github.actor }}
@@ -117,7 +123,7 @@ jobs:
         with:
           values: dufs/values.yaml
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4a6ed33ba735d57ebbcd89fe8ed35134de599a67 # ratchet:hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@0.39.2
+      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@f44e1bcc350b6bfe9e4a86a27b1d5e032e58f292 # 4.2.1; ratchet:hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4.2.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: release-chart-${{ needs.update_release_draft.outputs.latestRelease }}
@@ -135,7 +141,7 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git fetch --all
-          git checkout ${BRANCH_NAME}
+          git checkout "$BRANCH_NAME"
           git pull --rebase
           echo "commit id: $(git rev-parse --short HEAD)"
         env:
@@ -175,7 +181,7 @@ jobs:
 
       # 1. Sigstore signature (keyless cosign sign) on the immutable chart digest
       - name: sign chart with cosign
-        uses: hoverkraft-tech/ci-github-container/actions/helm/sign-chart@5ffc3c81daacc57700a14bb91d67edbc67eedc1d # ratchet:hoverkraft-tech/ci-github-container/actions/helm/sign-chart@0.39.0
+        uses: hoverkraft-tech/ci-github-container/actions/helm/sign-chart@d6569ca423f29f68152ee561f51f7de0c08db709 # 1.0.0; ratchet:hoverkraft-tech/ci-github-container/actions/helm/sign-chart@1.0.0
         with:
           charts: ${{ steps.push-chart.outputs.image-digest }}
           oci-registry: ghcr.io

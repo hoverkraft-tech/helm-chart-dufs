@@ -12,19 +12,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   pull-request-labeler:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     name: Pull request labeler
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
     steps:
-      - uses: release-drafter/release-drafter/autolabeler@978bb0b30c5ee8cdd332ced253758157150d43f0 # ratchet:release-drafter/release-drafter@v7
+      - uses: release-drafter/release-drafter/autolabeler@978bb0b30c5ee8cdd332ced253758157150d43f0 # ratchet:release-drafter/release-drafter@v7.10.0
 
   ci:
     name: Continuous Integration
-    uses: ./.github/workflows/__shared-ci.yml
+    uses: $/.github/workflows/__shared-ci.yml
     permissions:
       actions: write
       contents: read
@@ -32,4 +32,3 @@ jobs:
       issues: read
       packages: write
       pull-requests: read
-    secrets: inherit

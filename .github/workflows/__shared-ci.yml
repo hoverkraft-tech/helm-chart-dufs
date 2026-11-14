@@ -7,26 +7,29 @@ on:
         description: "Tag Version (semver - x.x.x)"
         type: string
         required: false
-    outputs:
-      built-images:
-        value: ${{ jobs.docker-build-images.outputs.built-images }}
+
+env:
+  DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+
+permissions:
+  contents: read
 
 jobs:
-
   chart-testing:
     name: "Tests: helm chart"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Install tools with mise
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # ratchet:jdx/mise-action@v5
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8; ratchet:jdx/mise-action@v5.2.8
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed="$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})"
+          changed="$(ct list-changed --target-branch "$DEFAULT_BRANCH")"
           echo "changed=${changed}"
           if [[ -n "$changed" ]]; then
             echo "INFO: The chart has changes compared to the default branch"
@@ -39,14 +42,14 @@ jobs:
         run: uv pip install --python "${VIRTUAL_ENV}/bin/python" "yamale==6.0.0"
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }}
+        run: ct lint --target-branch "$DEFAULT_BRANCH"
       - name: Create kind cluster
         if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@ea822c7bf1874f08e5a491df991c228edffc3376 # ratchet:helm/kind-action@v1.15.2
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
-          ct install --target-branch ${{ github.event.repository.default_branch }}
+          ct install --target-branch "$DEFAULT_BRANCH"
       - name: show pods
         if: steps.list-changed.outputs.changed == 'true'
         run: |

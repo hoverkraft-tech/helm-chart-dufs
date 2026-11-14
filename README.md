@@ -1,4 +1,4 @@
-# Helm Chart: dufs
+# <img src=".github/logo.svg" width="56" alt="" /> Dufs Helm Chart
 
 <!-- markdownlint-disable MD013 -->
 
@@ -13,76 +13,49 @@
 
 <!-- markdownlint-enable MD013 -->
 
-A Helm chart for running [dufs](https://github.com/sigoden/dufs) — a distinctive utility file server — on Kubernetes.
+Deploy [Dufs](https://github.com/sigoden/dufs) for file sharing, uploads and WebDAV on Kubernetes.
 
-## Usage
+## Prerequisites
 
-The chart is published to the GitHub Container Registry as an OCI artifact:
+A Kubernetes cluster, a configured `kubectl` context and Helm with OCI registry support.
 
-```sh
-helm install dufs oci://ghcr.io/hoverkraft-tech/charts/dufs
-```
+## Install
 
-With custom values:
-
-```sh
-helm install dufs oci://ghcr.io/hoverkraft-tech/charts/dufs -f my-values.yaml
-```
-
-## Configuration
-
-See the [chart README](dufs/README.md) for the full list of default values and configuration options.
-
-## Artifact Hub
-
-This chart is listed on [Artifact Hub](https://artifacthub.io/packages/helm/dufs/dufs). The repository metadata is described in [`artifacthub-repo.yml`](artifacthub-repo.yml) and is automatically published to the OCI registry by the [release workflow](.github/workflows/release.yml).
-
-## Supply chain security
-
-Every released chart is published to the OCI registry with [Sigstore](https://www.sigstore.dev/) artifacts attached to its immutable digest:
-
-- **Signature** — the chart is signed keylessly with `cosign sign` using the GitHub Actions OIDC identity.
-- **SLSA provenance** — a [SLSA v1](https://slsa.dev/) build provenance attestation is attached with `cosign attest`.
-- **SBOM** — an [SPDX](https://spdx.dev/) software bill of materials is generated and attached with `cosign attest`.
-
-Verify the signature before installing:
+Review [the chart values](dufs/values.yaml), save your settings in `my-values.yaml`,
+then install a published chart:
 
 ```sh
-cosign verify \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp https://github.com/hoverkraft-tech/helm-chart-dufs \
-  ghcr.io/hoverkraft-tech/charts/dufs@sha256:<digest>
+helm upgrade --install dufs oci://ghcr.io/hoverkraft-tech/charts/dufs \
+  --namespace dufs --create-namespace \
+  --values my-values.yaml
 ```
 
-Download and inspect the attestations (SLSA provenance and SPDX SBOM):
-
-```sh
-cosign verify-attestation \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp https://github.com/hoverkraft-tech/helm-chart-dufs \
-  --type slsaprovenance1 \
-  ghcr.io/hoverkraft-tech/charts/dufs@sha256:<digest>
-
-cosign verify-attestation \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp https://github.com/hoverkraft-tech/helm-chart-dufs \
-  --type spdxjson \
-  ghcr.io/hoverkraft-tech/charts/dufs@sha256:<digest>
-```
+The chart is available on [Artifact Hub](https://artifacthub.io/packages/helm/dufs/dufs).
+Released charts include signatures, provenance and an SBOM. Verify them before
+installing with the [Sigstore verification instructions](https://docs.sigstore.dev/cosign/verifying/verify/).
 
 ## Development
 
-All tooling is managed by [mise](https://mise.jdx.dev/):
+Open the repository in the provided dev container or install
+[mise](https://mise.jdx.dev/), then run:
 
 ```sh
-mise install          # install helm, helm-docs, kubeconform, ...
-mise run              # run all tasks (schema, docs, tests)
-mise run schema       # regenerate dufs/values.schema.json
-mise run docs         # regenerate dufs/README.md with helm-docs
-mise run tests        # lint, validate (kubeconform) and install-test the chart
-mise run template     # render the chart locally with helm template
+mise install
+make lint
 ```
+
+Use `make lint-fix` for supported automatic lint fixes. See the generated
+[chart documentation](dufs/README.md) for every chart value.
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or a pull request on [GitHub](https://github.com/hoverkraft-tech/helm-chart-dufs).
+Open an issue or pull request to discuss changes. Contributions must include
+the corresponding value schema and generated chart documentation updates.
+
+## Maintainer
+
+Maintained by [Hoverkraft](https://hoverkraft.cloud).
+
+## License
+
+[MIT](LICENSE).

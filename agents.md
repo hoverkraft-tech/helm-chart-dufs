@@ -32,5 +32,5 @@ The chart is published via Artifact Hub (see `artifacthub-repo.yml` and the anno
 3. **Use [Semantic Versioning](https://semver.org/)** for the chart `version` in `Chart.yaml`:
    - MAJOR: breaking chart changes (values renamed/removed, behavior changes)
    - MINOR: new backwards-compatible features
-   - PATCH: bug fixes, docs, chores
-   Bump `appVersion` when the underlying dufs image version changes.
+   - PATCH: bugfixes, docs, chores
+     Bump `appVersion` when the underlying dufs image version changes.

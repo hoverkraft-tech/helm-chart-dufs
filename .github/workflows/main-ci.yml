@@ -13,15 +13,31 @@ permissions:
   contents: read
 
 jobs:
-
   ci:
     name: Continuous Integration
-    uses: ./.github/workflows/__shared-ci.yml
+    uses: $/.github/workflows/__shared-ci.yml
     permissions:
-      actions: write
+      actions: read
       contents: read
-      id-token: write
-      issues: read
-      packages: write
-      pull-requests: read
-    secrets: inherit
+      issues: write
+      packages: read
+      pull-requests: write
+      security-events: write
+      statuses: write
+
+  documentation:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hoverkraft-tech/ci-github-container/actions/helm/generate-docs@b055d6ce0f3a5e223615ad494d88d92e17af11e5 # 4.2.0
+        with:
+          working-directory: dufs
+          values-file: values.yaml
+          checkout-ref: ""
+          github-app-client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
+          github-app-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}

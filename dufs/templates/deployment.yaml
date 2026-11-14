@@ -33,7 +33,7 @@ spec:
       {{- if .Values.assetsZipUrl }}
       initContainers:
         - name: setup-theme
-          image: busybox
+          image: busybox:1.38.0
           command:
             - sh
             - -c

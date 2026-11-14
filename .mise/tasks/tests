@@ -11,5 +11,5 @@ mise run ct:lint
 echo "$NO_INSTALL"
 
 if [ "${NO_INSTALL}" = "false" ]; then
-  mise run ct:install
+	mise run ct:install
 fi

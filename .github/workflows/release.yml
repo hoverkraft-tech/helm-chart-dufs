@@ -1,229 +1,97 @@
-name: 🚀 Release
+# Prepare committed chart versions, validate the dispatched tag, then publish.
+name: Release
 
 on:
+  # checkov:skip=CKV_GHA_7:Force overrides only the no-change plan, never validation or publication checks.
   workflow_dispatch:
+    inputs:
+      force:
+        description: Release even without changes
+        type: boolean
+        default: false
+  schedule:
+    - cron: "25 8 * * 1"
+
+permissions: {}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
-
-  check-branches:
-    name: Check branches
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check branch
-        run: |
-          if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
-            echo "This action can only be run on the ${{ github.event.repository.default_branch }} branch"
-            exit 1
-          fi
-
-  update_release_draft:
-    name: Draft a new release
-    # we want to publish a new tag only if ci succeeds
-    needs: check-branches
-    permissions:
-      contents: write
-      pull-requests: read
-    runs-on: ubuntu-latest
-    outputs:
-      latestRelease: ${{ steps.update_release_draft.outputs.tag_name }}
-    steps:
-      # create a new release
-      - id: update_release_draft
-        uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # ratchet:release-drafter/release-drafter@v7
-        with:
-          publish: true
-
-  ci:
-    needs: update_release_draft
-    name: Continuous Integration
-    uses: ./.github/workflows/__shared-ci.yml
-    with:
-      tag: ${{ needs.update_release_draft.outputs.latestRelease }}
+  prepare:
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/prepare-chart-release.yml@b055d6ce0f3a5e223615ad494d88d92e17af11e5 # 4.2.0
     permissions:
       actions: write
-      contents: read
-      id-token: write
-      issues: read
-      packages: write
+      contents: write
       pull-requests: read
-    secrets: inherit
+    with:
+      path: dufs
+      force: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
+      github-app-client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
+    secrets:
+      github-app-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
 
-  helm-publish:
-    name: "Helm: push chart to OCI registry"
-    needs: [update_release_draft, ci]
+  validate:
+    needs: prepare
+    if: needs.prepare.outputs.status == 'ready'
+    uses: $/.github/workflows/__shared-ci.yml
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      packages: read
+      pull-requests: write
+      security-events: write
+      statuses: write
+    with:
+      upload-artifact: true
+
+  release:
+    name: Publish chart, attestations and GitHub release
+    needs: [prepare, validate]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
-      id-token: write  # required for keyless cosign sign/attest (Sigstore OIDC)
-      packages: write  # required to push the chart, its signature and attestations to ghcr.io
-      pull-requests: write
-    outputs:
-      chart-image: ${{ steps.push-chart.outputs.image }}
-      chart-digest: ${{ steps.push-chart.outputs.digest }}
+      packages: write
+      id-token: write
+      attestations: write
+      pull-requests: read
     steps:
-      # Get a local copy of the code
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
-
-      # install tools with mise
-      - name: install tools with mise
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # ratchet:jdx/mise-action@v5
-
-      - name: login to OCI registry
-        run: |
-          echo "+ login to OCI registry"
-          helm registry login ${OCI_REGISTRY} -u "${OCI_REGISTRY_USERNAME}" -p "${OCI_REGISTRY_PASSWORD}"
-        env:
-          OCI_REGISTRY: ghcr.io
-          OCI_REGISTRY_USERNAME: ${{ github.actor }}
-          OCI_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: update helm chart version
-        run: |
-          cd "${CHART_PATH}"
-          echo "+ update helm chart version to ${VERSION}"
-          sed -i "s/^version: .*/version: ${VERSION}/g" Chart.yaml
-          # we don't want to touch appVersion in this case
-          # sed -i "s/^appVersion: .*/appVersion: ${VERSION}/g" Chart.yaml
-        env:
-          CHART_PATH: ${{github.workspace}}/dufs
-          VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
-
-      - name: update helm chart docs
-        uses: losisin/helm-docs-github-action@9e0787c426fdec38be6288bb5c0559dcb388412c # ratchet:losisin/helm-docs-github-action@v2.0.1
+      - name: Publish and sign validated archive
+        id: publish
+        uses: hoverkraft-tech/ci-github-container/actions/helm/release-chart@b055d6ce0f3a5e223615ad494d88d92e17af11e5 # 4.2.0
         with:
-          chart-search-root: dufs
-          git-push: "false"
+          artifact-id: ${{ needs.validate.outputs.artifact-id }}
+          archive-name: ${{ needs.validate.outputs.archive-name }}
+          checksum: ${{ needs.validate.outputs.checksum }}
+          oci-repository: hoverkraft-tech/charts
 
-      - name: update chart README.md version badge
-        run: |
-          echo "+ update chart README.md version badge to ${VERSION}"
-          sed -i -E "s|!\[Version: [^]]+\]\(https://img.shields.io/badge/Version-[^)]+\)|![Version: ${VERSION}](https://img.shields.io/badge/Version-${VERSION}-informational?style=flat-square)|g" dufs/README.md
-        env:
-          VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
-
-      - name: update root README.md version badge
-        run: |
-          echo "+ update root README.md version badge to ${VERSION}"
-          sed -i -E "s|\[!\[Version\]\(https://img.shields.io/badge/Version-[^)]+\)|[![Version](https://img.shields.io/badge/Version-${VERSION}-informational?style=flat-square)|g" README.md
-        env:
-          VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
-
-      - name: update helm values schema json
-        uses: losisin/helm-values-schema-json-action@9ed68d9d464a5e6f7f5fc1f3dc071828cf7d13a2 # ratchet:losisin/helm-values-schema-json-action@v3.2.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          values: dufs/values.yaml
+          persist-credentials: false
 
-      - uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@4a6ed33ba735d57ebbcd89fe8ed35134de599a67 # ratchet:hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@0.39.2
+      - name: Install publication tools
+        uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+
+      - name: Authenticate chart attestations and metadata
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          branch: release-chart-${{ needs.update_release_draft.outputs.latestRelease }}
-          title: "ci: release chart ${{ needs.update_release_draft.outputs.latestRelease }}"
-          body: Release app and chart version ${{ needs.update_release_draft.outputs.latestRelease }}
-          commit-message: |
-            ci: release chart ${{ needs.update_release_draft.outputs.latestRelease }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
-            [skip ci]
-
-      - name: refresh main branch
-        run: |
-          set -x
-          echo "refreshing current branch"
-          git config --global user.name "${GITHUB_ACTOR}"
-          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git fetch --all
-          git checkout ${BRANCH_NAME}
-          git pull --rebase
-          echo "commit id: $(git rev-parse --short HEAD)"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-
-      # Package and push the chart, capturing the immutable OCI digest so that
-      # signing and attestations target the exact artifact that was published.
-      - name: push helm chart to OCI registry
-        id: push-chart
-        run: |
-          set -euo pipefail
-          chart_ref="${OCI_REGISTRY}/${OCI_REGISTRY_CHART_REPOSITORY}/dufs"
-          destination="$(mktemp -d)"
-
-          echo "+ package chart ${VERSION}"
-          helm package "${CHART_PATH}" --version "${VERSION}" --destination "${destination}"
-
-          echo "+ push ${chart_ref}:${VERSION}"
-          push_output="$(helm push "${destination}"/dufs-"${VERSION}".tgz "oci://${OCI_REGISTRY}/${OCI_REGISTRY_CHART_REPOSITORY}" 2>&1)"
-          echo "${push_output}"
-
-          digest="$(echo "${push_output}" | grep -oE 'sha256:[a-f0-9]{64}' | head -n1)"
-          if [[ -z "${digest}" ]]; then
-            echo "ERROR: could not determine the pushed chart digest" >&2
-            exit 1
-          fi
-
-          echo "image=${chart_ref}:${VERSION}" >> "${GITHUB_OUTPUT}"
-          echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
-          echo "image-digest=${chart_ref}:${VERSION}@${digest}" >> "${GITHUB_OUTPUT}"
-        env:
-          CHART_PATH: ${{ github.workspace }}/dufs
-          VERSION: ${{ needs.update_release_draft.outputs.latestRelease }}
-          OCI_REGISTRY: ghcr.io
-          OCI_REGISTRY_CHART_REPOSITORY: hoverkraft-tech/charts
-
-      # 1. Sigstore signature (keyless cosign sign) on the immutable chart digest
-      - name: sign chart with cosign
-        uses: hoverkraft-tech/ci-github-container/actions/helm/sign-chart@5ffc3c81daacc57700a14bb91d67edbc67eedc1d # ratchet:hoverkraft-tech/ci-github-container/actions/helm/sign-chart@0.39.0
+      - name: Attest chart provenance
+        uses: hoverkraft-tech/ci-github-container/actions/docker/attest-image@b055d6ce0f3a5e223615ad494d88d92e17af11e5 # 4.2.0
         with:
-          charts: ${{ steps.push-chart.outputs.image-digest }}
-          oci-registry: ghcr.io
-          oci-registry-username: ${{ github.actor }}
-          oci-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image: ${{ format('{0}@{1}', steps.publish.outputs.image, steps.publish.outputs.digest) }}
 
-      # 2. SLSA build provenance attestation (cosign attest, keyless)
-      - name: attest SLSA provenance
-        run: |
-          set -euo pipefail
-          predicate="$(mktemp).json"
-          jq -n \
-            --arg repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
-            --arg sha "${GITHUB_SHA}" \
-            --arg ref "${GITHUB_REF}" \
-            --arg workflow "${GITHUB_WORKFLOW}" \
-            '{
-              _type: "https://in-toto.io/Statement/v1",
-              subject: [],
-              predicateType: "https://slsa.dev/provenance/v1",
-              predicate: {
-                buildDefinition: {
-                  buildType: ( $repo + "/.github/workflows/release.yml" ),
-                  externalParameters: { repository: $repo, ref: $ref, workflow: $workflow },
-                  internalParameters: { github: { event_name: env.GITHUB_EVENT_NAME, repository_id: env.GITHUB_REPOSITORY_ID } }
-                },
-                runDetails: {
-                  builder: { id: ( $repo + "/actions/runs/" + env.GITHUB_RUN_ID ) },
-                  metadata: { invocationId: ( env.GITHUB_RUN_ID + "/" + env.GITHUB_RUN_ATTEMPT ) }
-                }
-              }
-            }' > "${predicate}"
-          COSIGN_EXPERIMENTAL=1 cosign attest --yes \
-            --predicate "${predicate}" \
-            --type slsaprovenance1 \
-            "${{ steps.push-chart.outputs.image-digest }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 3. SBOM (SPDX) generated from the packaged chart and attached via cosign attest
       - name: generate SPDX SBOM
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # ratchet:anchore/sbom-action@v0.24.3
         with:
           path: ${{ github.workspace }}/dufs
-          format: spdx-json
           output-file: sbom.spdx.json
-          upload-artifact: true
           upload-release-assets: false
           artifact-name: dufs-chart-sbom
 
@@ -233,9 +101,10 @@ jobs:
           COSIGN_EXPERIMENTAL=1 cosign attest --yes \
             --predicate sbom.spdx.json \
             --type spdxjson \
-            "${{ steps.push-chart.outputs.image-digest }}"
+            "$CHART_IMAGE"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHART_IMAGE: ${{ steps.publish.outputs.image-digest }}
 
       # Publish the Artifact Hub repository metadata (artifacthub-repo.yml) to the
       # special "artifacthub.io" tag so Artifact Hub can fetch it for features
@@ -250,3 +119,9 @@ jobs:
             artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
         env:
           OCI_REPOSITORY: ghcr.io/hoverkraft-tech/charts/dufs
+
+      - uses: hoverkraft-tech/ci-github-publish/actions/release/create@80fa7011b27f49f2e04a19f932d36047d17a28f2 # 3.0.7
+        with:
+          tag: ${{ needs.prepare.outputs.tag }}
+          target-ref: ${{ github.sha }}
+          changelog-summary: ${{ format('{{"llmAuth":{0},"llmProvider":"openai"}}', toJSON(secrets.OPENAI_API_KEY)) }}

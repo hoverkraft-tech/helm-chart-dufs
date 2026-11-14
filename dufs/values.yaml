@@ -4,7 +4,7 @@
 
 # -- dufs config file that will be used
 #    check the auth section if you want to add some authentication
-#    and allow uploads/deletes/patchs
+#    and allow uploads/deletes/patches
 "dufs.yaml": |
   # please adjust settings to your needs
   serve-path: '/dufs/data'

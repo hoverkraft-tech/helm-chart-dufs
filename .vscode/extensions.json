@@ -1,5 +1,3 @@
 {
-  "recommendations": [
-    "tim-koehler.helm-intellisense"
-  ]
+	"recommendations": ["tim-koehler.helm-intellisense"]
 }

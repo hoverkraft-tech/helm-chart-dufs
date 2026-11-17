@@ -1,54 +1,46 @@
-name: Internal - Common Continuous Integration tasks
+---
+name: Shared - Continuous Integration for common tasks
 
-on:
+on: # yamllint disable-line rule:truthy
   workflow_call:
     inputs:
-      tag:
-        description: "Tag Version (semver - x.x.x)"
-        type: string
-        required: false
+      upload-artifact:
+        description: Preserve the validated chart for publication
+        type: boolean
+        default: false
     outputs:
-      built-images:
-        value: ${{ jobs.docker-build-images.outputs.built-images }}
+      artifact-id:
+        description: Immutable artifact ID of the validated chart
+        value: ${{ jobs.tests-charts.outputs.artifact-id }}
+      archive-name:
+        description: Validated chart archive basename
+        value: ${{ jobs.tests-charts.outputs.archive-name }}
+      checksum:
+        description: SHA-256 of the validated chart archive
+        value: ${{ jobs.tests-charts.outputs.checksum }}
+
+permissions: {}
 
 jobs:
+  linter:
+    uses: hoverkraft-tech/ci-github-common/.github/workflows/linter.yml@f165c0ca3e88604611481e1408ace1e0e3a5ee47 # 4.3.1
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      packages: read
+      pull-requests: write
+      security-events: write
+      statuses: write
+    with:
+      codeql-languages: ""
 
-  chart-testing:
-    name: "Tests: helm chart"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: Install tools with mise
-        uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # ratchet:jdx/mise-action@v5
-      - name: Run chart-testing (list-changed)
-        id: list-changed
-        run: |
-          changed="$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})"
-          echo "changed=${changed}"
-          if [[ -n "$changed" ]]; then
-            echo "INFO: The chart has changes compared to the default branch"
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "INFO: The chart has no changes compared to the default branch"
-          fi
-      - name: Install chart-testing schema validator
-        if: steps.list-changed.outputs.changed == 'true'
-        run: uv pip install --python "${VIRTUAL_ENV}/bin/python" "yamale==6.0.0"
-      - name: Run chart-testing (lint)
-        if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }}
-      - name: Create kind cluster
-        if: steps.list-changed.outputs.changed == 'true'
-        uses: helm/kind-action@ea822c7bf1874f08e5a491df991c228edffc3376 # ratchet:helm/kind-action@v1.15.2
-      - name: Run chart-testing (install)
-        if: steps.list-changed.outputs.changed == 'true'
-        run: |
-          ct install --target-branch ${{ github.event.repository.default_branch }}
-      - name: show pods
-        if: steps.list-changed.outputs.changed == 'true'
-        run: |
-          sleep 10
-          kubectl get pods -A
+  tests-charts:
+    name: Tests - Charts
+    uses: hoverkraft-tech/ci-github-container/.github/workflows/helm-chart-ci.yml@b055d6ce0f3a5e223615ad494d88d92e17af11e5 # 4.2.0
+    permissions:
+      contents: read
+      packages: read
+    with:
+      path: dufs
+      upload-artifact: ${{ inputs.upload-artifact }}

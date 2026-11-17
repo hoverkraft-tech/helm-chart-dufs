@@ -1,0 +1,5 @@
+{
+	"threshold": 0,
+	"minTokens": 100,
+	"ignore": ["**/*.svg", "**/*.lock", "**/*.schema.json"]
+}

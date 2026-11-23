@@ -10,7 +10,7 @@
 		},
 		"assetsZipUrl": {
 			"default": "",
-			"description": " url of a zip file containing assets for custom Ui\n    see https://github.com/sigoden/dufs/tree/main/assets for reference",
+			"description": " URL of a ZIP file containing assets for the custom UI\n    see \u003chttps://github.com/sigoden/dufs/tree/main/assets\u003e for reference",
 			"title": "assetsZipUrl",
 			"type": "string"
 		},
@@ -67,6 +67,12 @@
 		"image": {
 			"additionalProperties": false,
 			"properties": {
+				"digest": {
+					"default": "sha256:e5152c04e41d5a9d785546278b632bf035c8a08c52d7e8d35f4b59681f5ff35a",
+					"description": "Overrides the immutable image digest. Clear it when selecting another tag.",
+					"title": "digest",
+					"type": "string"
+				},
 				"pullPolicy": {
 					"default": "IfNotPresent",
 					"title": "pullPolicy",
@@ -89,7 +95,7 @@
 					"type": "string"
 				}
 			},
-			"required": ["registry", "repository", "pullPolicy", "tag"],
+			"required": ["registry", "repository", "pullPolicy", "tag", "digest"],
 			"title": "image",
 			"type": "object"
 		},
@@ -230,7 +236,48 @@
 		},
 		"podSecurityContext": {
 			"additionalProperties": false,
-			"required": [],
+			"properties": {
+				"fsGroup": {
+					"default": 10001,
+					"title": "fsGroup",
+					"type": "integer"
+				},
+				"runAsGroup": {
+					"default": 10001,
+					"title": "runAsGroup",
+					"type": "integer"
+				},
+				"runAsNonRoot": {
+					"default": true,
+					"title": "runAsNonRoot",
+					"type": "boolean"
+				},
+				"runAsUser": {
+					"default": 10001,
+					"title": "runAsUser",
+					"type": "integer"
+				},
+				"seccompProfile": {
+					"additionalProperties": false,
+					"properties": {
+						"type": {
+							"default": "RuntimeDefault",
+							"title": "type",
+							"type": "string"
+						}
+					},
+					"required": ["type"],
+					"title": "seccompProfile",
+					"type": "object"
+				}
+			},
+			"required": [
+				"fsGroup",
+				"runAsGroup",
+				"runAsNonRoot",
+				"runAsUser",
+				"seccompProfile"
+			],
 			"title": "podSecurityContext",
 			"type": "object"
 		},
@@ -267,13 +314,87 @@
 		},
 		"resources": {
 			"additionalProperties": false,
-			"required": [],
+			"properties": {
+				"limits": {
+					"additionalProperties": false,
+					"properties": {
+						"cpu": {
+							"default": "500m",
+							"title": "cpu",
+							"type": "string"
+						},
+						"memory": {
+							"default": "128Mi",
+							"title": "memory",
+							"type": "string"
+						}
+					},
+					"required": ["cpu", "memory"],
+					"title": "limits",
+					"type": "object"
+				},
+				"requests": {
+					"additionalProperties": false,
+					"properties": {
+						"cpu": {
+							"default": "50m",
+							"title": "cpu",
+							"type": "string"
+						},
+						"memory": {
+							"default": "32Mi",
+							"title": "memory",
+							"type": "string"
+						}
+					},
+					"required": ["cpu", "memory"],
+					"title": "requests",
+					"type": "object"
+				}
+			},
+			"required": ["limits", "requests"],
 			"title": "resources",
 			"type": "object"
 		},
 		"securityContext": {
 			"additionalProperties": false,
-			"required": [],
+			"properties": {
+				"allowPrivilegeEscalation": {
+					"default": false,
+					"title": "allowPrivilegeEscalation",
+					"type": "boolean"
+				},
+				"capabilities": {
+					"additionalProperties": false,
+					"properties": {
+						"drop": {
+							"items": {
+								"anyOf": [
+									{
+										"type": "string"
+									}
+								],
+								"required": []
+							},
+							"title": "drop",
+							"type": "array"
+						}
+					},
+					"required": ["drop"],
+					"title": "capabilities",
+					"type": "object"
+				},
+				"readOnlyRootFilesystem": {
+					"default": true,
+					"title": "readOnlyRootFilesystem",
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"allowPrivilegeEscalation",
+				"capabilities",
+				"readOnlyRootFilesystem"
+			],
 			"title": "securityContext",
 			"type": "object"
 		},
@@ -306,7 +427,7 @@
 					"type": "object"
 				},
 				"automount": {
-					"default": true,
+					"default": false,
 					"description": "Automatically mount a ServiceAccount's API credentials?",
 					"title": "automount",
 					"type": "boolean"

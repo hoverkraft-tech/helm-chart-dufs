@@ -2,4 +2,20 @@
 #MISE dir="{{ config_root }}"
 #MISE description="run helm-kubeconform on the given helm chart"
 
-helm kubeconform --values-dir "${HELM_CHART_NAME}/ci" --kubernetes-version "${K8S_VERSION}" --summary "${HELM_CHART_NAME}"
+set -euo pipefail
+
+values_files=("${HELM_CHART_NAME}/ci/"*.yaml)
+if [ "${#values_files[@]}" -eq 1 ] && [ ! -f "${values_files[0]}" ]; then
+  values_files=()
+fi
+
+if [ "${#values_files[@]}" -eq 0 ]; then
+  helm template "${HELM_CHART_NAME}" "${HELM_CHART_NAME}" |
+    kubeconform -strict -kubernetes-version "${K8S_VERSION}" -summary
+  exit
+fi
+
+for values_file in "${values_files[@]}"; do
+  helm template "${HELM_CHART_NAME}" "${HELM_CHART_NAME}" --values "${values_file}" |
+    kubeconform -strict -kubernetes-version "${K8S_VERSION}" -summary
+done

@@ -1,5 +1,7 @@
 # dufs
 
+<!-- markdownlint-disable-next-line MD013 -->
+
 ![Version: 0.2.4](https://img.shields.io/badge/Version-0.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.47.0](https://img.shields.io/badge/AppVersion-v0.47.0-informational?style=flat-square)
 
 A Helm chart for running dufs
@@ -19,6 +21,8 @@ A Helm chart for running dufs
 - <https://github.com/sigoden/dufs>
 
 ## Values
+
+<!-- markdownlint-disable MD013 -->
 
 | Key                                        | Type   | Default                                                                                                                                                                                                                                                                                                                                                                                           | Description                                                                                                                        |
 | ------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -76,6 +80,8 @@ A Helm chart for running dufs
 | volumeMounts[0].readOnly                   | bool   | `false`                                                                                                                                                                                                                                                                                                                                                                                           |                                                                                                                                    |
 | volumes[0].emptyDir                        | object | `{}`                                                                                                                                                                                                                                                                                                                                                                                              |                                                                                                                                    |
 | volumes[0].name                            | string | `"data"`                                                                                                                                                                                                                                                                                                                                                                                          |                                                                                                                                    |
+
+<!-- markdownlint-enable MD013 -->
 
 ---
 

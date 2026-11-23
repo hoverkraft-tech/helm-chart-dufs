@@ -1,8 +1,14 @@
 extends: default
 
-# Raw Go templates are not YAML. Helm and Kubeconform validate their output.
+# Raw Go templates are not YAML. Keep each exception explicit.
 ignore: |
-  **/templates/**
+  **/dufs/templates/configmap.yaml
+  **/dufs/templates/deployment.yaml
+  **/dufs/templates/hpa.yaml
+  **/dufs/templates/ingress.yaml
+  **/dufs/templates/serviceaccount.yaml
+  **/dufs/templates/service.yaml
+  **/dufs/templates/tests/test-connection.yaml
 
 rules:
   document-start: disable

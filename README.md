@@ -1,3 +1,5 @@
+<!-- markdownlint-disable-next-line MD033 -->
+
 # <img src=".github/logo.svg" width="56" alt="" /> Dufs Helm Chart
 
 <!-- markdownlint-disable MD013 -->
@@ -13,11 +15,13 @@
 
 <!-- markdownlint-enable MD013 -->
 
-Deploy [Dufs](https://github.com/sigoden/dufs) for file sharing, uploads and WebDAV on Kubernetes.
+Deploy [Dufs](https://github.com/sigoden/dufs) for file sharing, uploads and
+WebDAV on Kubernetes.
 
 ## Prerequisites
 
-A Kubernetes cluster, a configured `kubectl` context and Helm with OCI registry support.
+A Kubernetes cluster, a configured `kubectl` context and Helm with OCI registry
+support.
 
 ## Install
 

@@ -68,9 +68,10 @@ Normalize image name and version
 {{- $registry := .Values.image.registry }}
 {{- $repository := .Values.image.repository }}
 {{- $tag := default .Chart.AppVersion .Values.image.tag }}
+{{- $digest := .Values.image.digest }}
 {{- if $registry }}
-{{- printf "%s/%s:%s" $registry $repository $tag }}
+{{- printf "%s/%s:%s%s" $registry $repository $tag (ternary "" (printf "@%s" $digest) (empty $digest)) }}
 {{- else }}
-{{- printf "%s:%s" $repository $tag }}
+{{- printf "%s:%s%s" $repository $tag (ternary "" (printf "@%s" $digest) (empty $digest)) }}
 {{- end }}
 {{- end }}

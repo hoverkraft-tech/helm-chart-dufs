@@ -18,7 +18,11 @@ updates:
       time: "04:00"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "/"
+      - "/dufs"
+      - "/dufs/templates"
+      - "/dufs/templates/tests"
     cooldown:
       default-days: 7
     commit-message:
@@ -30,6 +34,22 @@ updates:
       time: "04:10"
     groups:
       docker-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "helm"
+    directory: "/dufs"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: build
+      include: scope
+    schedule:
+      interval: "weekly"
+      day: friday
+      time: "04:20"
+    groups:
+      helm-dependencies:
         patterns:
           - "*"
 

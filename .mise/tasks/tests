@@ -3,12 +3,12 @@
 #MISE description="run tests"
 #USAGE flag "--no-install" help="disable ct install" {}
 
+set -euo pipefail
+
 NO_INSTALL="${usage_no_install:-false}"
 
 mise run kubeconform --chart-dir "${HELM_CHART_NAME}"
 mise run ct:lint
-
-echo "$NO_INSTALL"
 
 if [ "${NO_INSTALL}" = "false" ]; then
 	mise run ct:install

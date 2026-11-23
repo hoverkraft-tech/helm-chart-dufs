@@ -32,8 +32,6 @@ jobs:
       pull-requests: write
       security-events: write
       statuses: write
-    with:
-      codeql-languages: ""
 
   tests-charts:
     name: Tests - Charts

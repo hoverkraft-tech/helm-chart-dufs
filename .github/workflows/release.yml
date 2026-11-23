@@ -1,7 +1,8 @@
+---
 # Prepare committed chart versions, validate the dispatched tag, then publish.
 name: Release
 
-on:
+on: # yamllint disable-line rule:truthy
   # checkov:skip=CKV_GHA_7:Force overrides only the no-change plan, never validation or publication checks.
   workflow_dispatch:
     inputs:
@@ -27,6 +28,7 @@ jobs:
       pull-requests: read
     with:
       path: dufs
+      update-app-version: true
       force: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
       github-app-client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
     secrets:
@@ -48,7 +50,7 @@ jobs:
       upload-artifact: true
 
   release:
-    name: Publish chart, attestations and GitHub release
+    name: Publish validated chart and GitHub release
     needs: [prepare, validate]
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -56,7 +58,6 @@ jobs:
       contents: write
       packages: write
       id-token: write
-      attestations: write
       pull-requests: read
     steps:
       - name: Publish and sign validated archive
@@ -68,60 +69,8 @@ jobs:
           checksum: ${{ needs.validate.outputs.checksum }}
           oci-repository: hoverkraft-tech/charts
 
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install publication tools
-        uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
-
-      - name: Authenticate chart attestations and metadata
-        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
-      - name: Attest chart provenance
-        uses: hoverkraft-tech/ci-github-container/actions/docker/attest-image@b055d6ce0f3a5e223615ad494d88d92e17af11e5 # 4.2.0
-        with:
-          image: ${{ format('{0}@{1}', steps.publish.outputs.image, steps.publish.outputs.digest) }}
-
-      - name: generate SPDX SBOM
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # ratchet:anchore/sbom-action@v0.24.3
-        with:
-          path: ${{ github.workspace }}/dufs
-          output-file: sbom.spdx.json
-          upload-release-assets: false
-          artifact-name: dufs-chart-sbom
-
-      - name: attest SPDX SBOM
-        run: |
-          set -euo pipefail
-          COSIGN_EXPERIMENTAL=1 cosign attest --yes \
-            --predicate sbom.spdx.json \
-            --type spdxjson \
-            "$CHART_IMAGE"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHART_IMAGE: ${{ steps.publish.outputs.image-digest }}
-
-      # Publish the Artifact Hub repository metadata (artifacthub-repo.yml) to the
-      # special "artifacthub.io" tag so Artifact Hub can fetch it for features
-      # like "Verified publisher" (it cannot read the file from the git repo).
-      - name: publish Artifact Hub repository metadata
-        run: |
-          set -euo pipefail
-          echo "+ push artifacthub-repo.yml to ${OCI_REPOSITORY}:artifacthub.io"
-          oras push \
-            "${OCI_REPOSITORY}:artifacthub.io" \
-            --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
-            artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
-        env:
-          OCI_REPOSITORY: ghcr.io/hoverkraft-tech/charts/dufs
-
-      - uses: hoverkraft-tech/ci-github-publish/actions/release/create@80fa7011b27f49f2e04a19f932d36047d17a28f2 # 3.0.7
+      - uses: hoverkraft-tech/ci-github-publish/actions/release/create@d034b96d52f6f32c58a93bcd87a06932f50d8b26 # 3.1.0
         with:
           tag: ${{ needs.prepare.outputs.tag }}
           target-ref: ${{ github.sha }}
-          changelog-summary: ${{ format('{{"llmAuth":{0},"llmProvider":"openai"}}', toJSON(secrets.OPENAI_API_KEY)) }}
+          changelog-summary: ${{ secrets.CHANGELOG_SUMMARY }}

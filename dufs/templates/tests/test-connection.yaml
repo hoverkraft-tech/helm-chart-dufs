@@ -41,5 +41,5 @@ spec:
           cpu: 10m
           memory: 16Mi
       command: ['wget']
-      args: ['{{ include "dufs.fullname" . }}:{{ .Values.service.port }}']
+      args: ['-q', '-O', '/dev/null', '{{ include "dufs.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

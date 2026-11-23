@@ -1,10 +1,6 @@
-# Trivy cannot express these Helm false positives with inline comments.
+# Inline ignore is not supported when metadata.namespace is omitted.
 misconfigurations:
   - id: KSV-0110
     paths:
       - dufs/templates/deployment.yaml
-    statement: The installer selects the release namespace.
-  - id: KSV-0125
-    paths:
-      - dufs/templates/deployment.yaml
-    statement: The chart uses the documented upstream Docker Hub image.
+    statement: Helm installs namespaced resources in the release namespace.

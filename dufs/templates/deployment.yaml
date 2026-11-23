@@ -1,3 +1,4 @@
+# trivy:ignore:KSV0110
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -75,6 +76,7 @@ spec:
               readOnly: false
       {{- end }}
       containers:
+        # trivy:ignore:KSV0125
         - name: {{ .Chart.Name }}
           env:
             - name: DUFS_CONFIG

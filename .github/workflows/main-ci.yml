@@ -38,6 +38,7 @@ jobs:
         with:
           working-directory: dufs
           values-file: values.yaml
+          merge-method: squash
           checkout-ref: ""
           github-app-client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
           github-app-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}

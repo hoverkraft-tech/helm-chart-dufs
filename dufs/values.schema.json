@@ -1,546 +1,283 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"additionalProperties": false,
-	"properties": {
-		"affinity": {
-			"additionalProperties": false,
-			"required": [],
-			"title": "affinity",
-			"type": "object"
-		},
-		"assetsZipUrl": {
-			"default": "",
-			"description": " URL of a ZIP file containing assets for the custom UI\n    see \u003chttps://github.com/sigoden/dufs/tree/main/assets\u003e for reference",
-			"title": "assetsZipUrl",
-			"type": "string"
-		},
-		"autoscaling": {
-			"additionalProperties": false,
-			"properties": {
-				"enabled": {
-					"default": false,
-					"title": "enabled",
-					"type": "boolean"
-				},
-				"maxReplicas": {
-					"default": 100,
-					"title": "maxReplicas",
-					"type": "integer"
-				},
-				"minReplicas": {
-					"default": 1,
-					"title": "minReplicas",
-					"type": "integer"
-				},
-				"targetCPUUtilizationPercentage": {
-					"default": 80,
-					"title": "targetCPUUtilizationPercentage",
-					"type": "integer"
-				}
-			},
-			"required": [
-				"enabled",
-				"minReplicas",
-				"maxReplicas",
-				"targetCPUUtilizationPercentage"
-			],
-			"title": "autoscaling",
-			"type": "object"
-		},
-		"dufs.yaml": {
-			"default": "# please adjust settings to your needs\nserve-path: '/dufs/data'\nauth: []\nallow-all: false\nallow-upload: true\nallow-delete: true\nallow-search: true\nallow-symlink: true\nallow-archive: true\nenable-cors: true\nrender-index: true\nrender-try-index: true\nrender-spa: true\nlog-format: '$remote_addr \"$request\" $status $http_user_agent'\nlog-file: /dev/stdout\ncompress: low\n",
-			"description": "dufs config file that will be used\n   check the auth section if you want to add some authentication\n   and allow uploads/deletes/patches",
-			"title": "dufs.yaml",
-			"type": "string"
-		},
-		"fullnameOverride": {
-			"default": "",
-			"title": "fullnameOverride",
-			"type": "string"
-		},
-		"global": {
-			"description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
-			"required": [],
-			"title": "global",
-			"type": "object"
-		},
-		"image": {
-			"additionalProperties": false,
-			"properties": {
-				"digest": {
-					"default": "sha256:e5152c04e41d5a9d785546278b632bf035c8a08c52d7e8d35f4b59681f5ff35a",
-					"description": "Overrides the immutable image digest. Clear it when selecting another tag.",
-					"title": "digest",
-					"type": "string"
-				},
-				"pullPolicy": {
-					"default": "IfNotPresent",
-					"title": "pullPolicy",
-					"type": "string"
-				},
-				"registry": {
-					"default": "docker.io",
-					"title": "registry",
-					"type": "string"
-				},
-				"repository": {
-					"default": "sigoden/dufs",
-					"title": "repository",
-					"type": "string"
-				},
-				"tag": {
-					"default": "",
-					"description": "Overrides the image tag whose default is the chart appVersion.",
-					"title": "tag",
-					"type": "string"
-				}
-			},
-			"required": ["registry", "repository", "pullPolicy", "tag", "digest"],
-			"title": "image",
-			"type": "object"
-		},
-		"imagePullSecrets": {
-			"items": {
-				"required": []
-			},
-			"title": "imagePullSecrets",
-			"type": "array"
-		},
-		"ingress": {
-			"additionalProperties": false,
-			"properties": {
-				"annotations": {
-					"additionalProperties": true,
-					"required": [],
-					"title": "annotations",
-					"type": ["object", "null"]
-				},
-				"className": {
-					"default": "",
-					"title": "className",
-					"type": "string"
-				},
-				"enabled": {
-					"default": false,
-					"title": "enabled",
-					"type": "boolean"
-				},
-				"hosts": {
-					"description": "kubernetes.io/ingress.class: nginx\nkubernetes.io/tls-acme: \"true\"",
-					"items": {
-						"anyOf": [
-							{
-								"additionalProperties": false,
-								"properties": {
-									"host": {
-										"default": "chart-example.local",
-										"title": "host",
-										"type": "string"
-									},
-									"paths": {
-										"items": {
-											"anyOf": [
-												{
-													"additionalProperties": false,
-													"properties": {
-														"path": {
-															"default": "/",
-															"title": "path",
-															"type": "string"
-														},
-														"pathType": {
-															"default": "ImplementationSpecific",
-															"title": "pathType",
-															"type": "string"
-														}
-													},
-													"required": ["path", "pathType"],
-													"type": "object"
-												}
-											],
-											"required": []
-										},
-										"title": "paths",
-										"type": "array"
-									}
-								},
-								"required": ["host", "paths"],
-								"type": "object"
-							}
-						],
-						"required": []
-					},
-					"title": "hosts",
-					"type": "array"
-				},
-				"tls": {
-					"items": {
-						"required": []
-					},
-					"title": "tls",
-					"type": "array"
-				}
-			},
-			"required": ["enabled", "className", "hosts", "tls"],
-			"title": "ingress",
-			"type": "object"
-		},
-		"livenessProbe": {
-			"additionalProperties": false,
-			"properties": {
-				"httpGet": {
-					"additionalProperties": false,
-					"properties": {
-						"path": {
-							"default": "/",
-							"title": "path",
-							"type": "string"
-						},
-						"port": {
-							"default": "http",
-							"title": "port",
-							"type": "string"
-						}
-					},
-					"required": ["path", "port"],
-					"title": "httpGet",
-					"type": "object"
-				}
-			},
-			"required": ["httpGet"],
-			"title": "livenessProbe",
-			"type": "object"
-		},
-		"nameOverride": {
-			"default": "",
-			"title": "nameOverride",
-			"type": "string"
-		},
-		"nodeSelector": {
-			"additionalProperties": false,
-			"required": [],
-			"title": "nodeSelector",
-			"type": "object"
-		},
-		"podAnnotations": {
-			"additionalProperties": false,
-			"required": [],
-			"title": "podAnnotations",
-			"type": "object"
-		},
-		"podLabels": {
-			"additionalProperties": false,
-			"required": [],
-			"title": "podLabels",
-			"type": "object"
-		},
-		"podSecurityContext": {
-			"additionalProperties": false,
-			"properties": {
-				"fsGroup": {
-					"default": 10001,
-					"title": "fsGroup",
-					"type": "integer"
-				},
-				"runAsGroup": {
-					"default": 10001,
-					"title": "runAsGroup",
-					"type": "integer"
-				},
-				"runAsNonRoot": {
-					"default": true,
-					"title": "runAsNonRoot",
-					"type": "boolean"
-				},
-				"runAsUser": {
-					"default": 10001,
-					"title": "runAsUser",
-					"type": "integer"
-				},
-				"seccompProfile": {
-					"additionalProperties": false,
-					"properties": {
-						"type": {
-							"default": "RuntimeDefault",
-							"title": "type",
-							"type": "string"
-						}
-					},
-					"required": ["type"],
-					"title": "seccompProfile",
-					"type": "object"
-				}
-			},
-			"required": [
-				"fsGroup",
-				"runAsGroup",
-				"runAsNonRoot",
-				"runAsUser",
-				"seccompProfile"
-			],
-			"title": "podSecurityContext",
-			"type": "object"
-		},
-		"readinessProbe": {
-			"additionalProperties": false,
-			"properties": {
-				"httpGet": {
-					"additionalProperties": false,
-					"properties": {
-						"path": {
-							"default": "/",
-							"title": "path",
-							"type": "string"
-						},
-						"port": {
-							"default": "http",
-							"title": "port",
-							"type": "string"
-						}
-					},
-					"required": ["path", "port"],
-					"title": "httpGet",
-					"type": "object"
-				}
-			},
-			"required": ["httpGet"],
-			"title": "readinessProbe",
-			"type": "object"
-		},
-		"replicaCount": {
-			"default": 1,
-			"title": "replicaCount",
-			"type": "integer"
-		},
-		"resources": {
-			"additionalProperties": false,
-			"properties": {
-				"limits": {
-					"additionalProperties": false,
-					"properties": {
-						"cpu": {
-							"default": "500m",
-							"title": "cpu",
-							"type": "string"
-						},
-						"memory": {
-							"default": "128Mi",
-							"title": "memory",
-							"type": "string"
-						}
-					},
-					"required": ["cpu", "memory"],
-					"title": "limits",
-					"type": "object"
-				},
-				"requests": {
-					"additionalProperties": false,
-					"properties": {
-						"cpu": {
-							"default": "50m",
-							"title": "cpu",
-							"type": "string"
-						},
-						"memory": {
-							"default": "32Mi",
-							"title": "memory",
-							"type": "string"
-						}
-					},
-					"required": ["cpu", "memory"],
-					"title": "requests",
-					"type": "object"
-				}
-			},
-			"required": ["limits", "requests"],
-			"title": "resources",
-			"type": "object"
-		},
-		"securityContext": {
-			"additionalProperties": false,
-			"properties": {
-				"allowPrivilegeEscalation": {
-					"default": false,
-					"title": "allowPrivilegeEscalation",
-					"type": "boolean"
-				},
-				"capabilities": {
-					"additionalProperties": false,
-					"properties": {
-						"drop": {
-							"items": {
-								"anyOf": [
-									{
-										"type": "string"
-									}
-								],
-								"required": []
-							},
-							"title": "drop",
-							"type": "array"
-						}
-					},
-					"required": ["drop"],
-					"title": "capabilities",
-					"type": "object"
-				},
-				"readOnlyRootFilesystem": {
-					"default": true,
-					"title": "readOnlyRootFilesystem",
-					"type": "boolean"
-				}
-			},
-			"required": [
-				"allowPrivilegeEscalation",
-				"capabilities",
-				"readOnlyRootFilesystem"
-			],
-			"title": "securityContext",
-			"type": "object"
-		},
-		"service": {
-			"additionalProperties": false,
-			"properties": {
-				"port": {
-					"default": 5000,
-					"title": "port",
-					"type": "integer"
-				},
-				"type": {
-					"default": "ClusterIP",
-					"title": "type",
-					"type": "string"
-				}
-			},
-			"required": ["type", "port"],
-			"title": "service",
-			"type": "object"
-		},
-		"serviceAccount": {
-			"additionalProperties": false,
-			"properties": {
-				"annotations": {
-					"additionalProperties": false,
-					"description": "Annotations to add to the service account",
-					"required": [],
-					"title": "annotations",
-					"type": "object"
-				},
-				"automount": {
-					"default": false,
-					"description": "Automatically mount a ServiceAccount's API credentials?",
-					"title": "automount",
-					"type": "boolean"
-				},
-				"create": {
-					"default": true,
-					"description": "Specifies whether a service account should be created",
-					"title": "create",
-					"type": "boolean"
-				},
-				"name": {
-					"default": "",
-					"description": "The name of the service account to use.\nIf not set and create is true, a name is generated using the fullname template",
-					"title": "name",
-					"type": "string"
-				}
-			},
-			"required": ["create", "automount", "annotations", "name"],
-			"title": "serviceAccount",
-			"type": "object"
-		},
-		"tolerations": {
-			"items": {
-				"required": []
-			},
-			"title": "tolerations",
-			"type": "array"
-		},
-		"volumeMounts": {
-			"description": "Additional volumeMounts on the output Deployment definition.",
-			"items": {
-				"anyOf": [
-					{
-						"additionalProperties": false,
-						"properties": {
-							"mountPath": {
-								"default": "/dufs/data",
-								"title": "mountPath",
-								"type": "string"
-							},
-							"name": {
-								"default": "data",
-								"title": "name",
-								"type": "string"
-							},
-							"readOnly": {
-								"default": false,
-								"title": "readOnly",
-								"type": "boolean"
-							}
-						},
-						"required": ["name", "mountPath", "readOnly"],
-						"type": "object"
-					}
-				],
-				"required": []
-			},
-			"title": "volumeMounts",
-			"type": "array"
-		},
-		"volumes": {
-			"description": "Additional volumes on the output Deployment definition.",
-			"items": {
-				"anyOf": [
-					{
-						"additionalProperties": false,
-						"properties": {
-							"emptyDir": {
-								"additionalProperties": false,
-								"required": [],
-								"title": "emptyDir",
-								"type": "object"
-							},
-							"name": {
-								"default": "data",
-								"title": "name",
-								"type": "string"
-							}
-						},
-						"required": ["name", "emptyDir"],
-						"type": "object"
-					}
-				],
-				"required": []
-			},
-			"title": "volumes",
-			"type": "array"
-		}
-	},
-	"required": [
-		"dufs.yaml",
-		"assetsZipUrl",
-		"replicaCount",
-		"image",
-		"imagePullSecrets",
-		"nameOverride",
-		"fullnameOverride",
-		"serviceAccount",
-		"podAnnotations",
-		"podLabels",
-		"podSecurityContext",
-		"securityContext",
-		"service",
-		"ingress",
-		"resources",
-		"livenessProbe",
-		"readinessProbe",
-		"autoscaling",
-		"volumes",
-		"volumeMounts",
-		"nodeSelector",
-		"tolerations",
-		"affinity"
-	],
-	"type": "object"
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "affinity": {
+            "type": "object"
+        },
+        "assetsZipUrl": {
+            "type": "string"
+        },
+        "autoscaling": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "maxReplicas": {
+                    "type": "integer"
+                },
+                "minReplicas": {
+                    "type": "integer"
+                },
+                "targetCPUUtilizationPercentage": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dufs.yaml": {
+            "type": "string"
+        },
+        "fullnameOverride": {
+            "type": "string"
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "digest": {
+                    "type": "string"
+                },
+                "pullPolicy": {
+                    "type": "string"
+                },
+                "registry": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "imagePullSecrets": {
+            "type": "array"
+        },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "className": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "array"
+                }
+            }
+        },
+        "livenessProbe": {
+            "type": "object",
+            "properties": {
+                "httpGet": {
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string"
+                        },
+                        "port": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "nameOverride": {
+            "type": "string"
+        },
+        "nodeSelector": {
+            "type": "object"
+        },
+        "podAnnotations": {
+            "type": "object"
+        },
+        "podLabels": {
+            "type": "object"
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "fsGroup": {
+                    "type": "integer"
+                },
+                "runAsGroup": {
+                    "type": "integer"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "readinessProbe": {
+            "type": "object",
+            "properties": {
+                "httpGet": {
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string"
+                        },
+                        "port": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "replicaCount": {
+            "type": "integer"
+        },
+        "resources": {
+            "type": "object",
+            "properties": {
+                "limits": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
+                        "memory": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "requests": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
+                        "memory": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "securityContext": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "capabilities": {
+                    "type": "object",
+                    "properties": {
+                        "drop": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "readOnlyRootFilesystem": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "automount": {
+                    "type": "boolean"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "tolerations": {
+            "type": "array"
+        },
+        "volumeMounts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "mountPath": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "readOnly": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "volumes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "emptyDir": {
+                        "type": "object"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
 }

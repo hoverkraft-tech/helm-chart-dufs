@@ -1,0 +1,11 @@
+{
+	"overrides": [
+		{
+			"includes": ["dufs/values.schema.json"],
+			"formatter": {
+				"indentStyle": "space",
+				"indentWidth": 4
+			}
+		}
+	]
+}
